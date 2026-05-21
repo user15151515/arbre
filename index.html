@@ -193,14 +193,18 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/></svg>
     Nova persona
   </button>
-  <button class="tb-btn" onclick="openRelModal()">
+  <button class="tb-btn" onclick="openRelPanel()" id="btn-rel">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="4" cy="8" r="2.5"/><circle cx="12" cy="8" r="2.5"/><line x1="6.5" y1="8" x2="9.5" y2="8"/></svg>
-    Afegir relació
+    Relacions
   </button>
   <div class="topbar-sep"></div>
   <button class="tb-btn" onclick="autoLayout()">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>
     Auto-ordenar
+  </button>
+  <button class="tb-btn" onclick="saveLayoutAsDefault()" title="Desa la posició actual de cada targeta com a predeterminada">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 2h9l3 3v9H2z"/><rect x="5" y="9" width="6" height="5"/><rect x="4" y="2" width="5" height="4"/></svg>
+    Desa vista
   </button>
   <button class="tb-btn" onclick="exportData()">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3v8m-3-3 3 3 3-3"/><path d="M3 12h10"/></svg>
@@ -318,39 +322,53 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
   </div>
 </div>
 
-<!-- RELATION MODAL -->
-<div class="modal-overlay" id="rel-modal">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">Afegir relació</div>
-      <button class="modal-close" onclick="closeRelModal()">✕</button>
+<!-- RELATION PANEL (person-centric, slides in from right) -->
+<div id="rel-panel-overlay" onclick="if(event.target===this)closeRelPanel()" style="position:fixed;inset:0;z-index:900;display:none;pointer-events:all"></div>
+<div id="rel-panel" style="
+  position:fixed;top:56px;right:0;bottom:0;width:340px;
+  background:var(--surface);border-left:1px solid var(--border);
+  z-index:901;display:flex;flex-direction:column;
+  transform:translateX(100%);transition:transform .25s ease;
+  box-shadow:-4px 0 24px rgba(60,40,20,.10);
+">
+  <!-- Header: person selector -->
+  <div style="padding:16px 18px 12px;border-bottom:1px solid var(--border);flex-shrink:0">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div style="font-family:'Playfair Display',serif;font-size:16px;color:var(--text)">Relacions</div>
+      <button onclick="closeRelPanel()" style="width:28px;height:28px;border:1px solid var(--border);background:var(--surface2);border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:14px">✕</button>
     </div>
-    <div class="modal-body">
-      <div class="form-row">
-        <label>Tipus de relació</label>
-        <select id="rel-type">
-          <option value="parent-child">Pare/Mare → Fill/a</option>
-          <option value="couple">Parella / Matrimoni</option>
-          <option value="sibling">Germans/es</option>
+    <div style="font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Persona seleccionada</div>
+    <select id="rp-person" onchange="renderRelPanel()" style="width:100%;padding:9px 12px;border:1px solid var(--border);background:var(--surface2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none"></select>
+  </div>
+
+  <!-- Relations display -->
+  <div style="flex:1;overflow-y:auto;padding:14px 18px" id="rp-body"></div>
+
+  <!-- Add new relation -->
+  <div style="padding:14px 18px;border-top:1px solid var(--border);flex-shrink:0;background:var(--surface)">
+    <div style="font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Afegir relació</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:4px">Tipus</div>
+        <select id="rp-type" onchange="rpTypeChanged()" style="width:100%;padding:7px 10px;border:1px solid var(--border);background:var(--surface2);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none">
+          <option value="couple">Parella</option>
+          <option value="parent-of">És pare/mare de</option>
+          <option value="child-of">És fill/a de</option>
         </select>
       </div>
-      <div class="form-2col">
-        <div class="form-row"><label>Persona A</label><select id="rel-a"></select></div>
-        <div class="form-row"><label>Persona B</label><select id="rel-b"></select></div>
-      </div>
-      <div class="form-row">
-        <label>Data (opcional)</label>
-        <input type="date" id="rel-date">
-      </div>
-      <div style="margin-top:14px">
-        <label style="font-size:12px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:8px">Relacions existents</label>
-        <div id="relation-list"></div>
+      <div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:4px">Amb qui</div>
+        <select id="rp-other" style="width:100%;padding:7px 10px;border:1px solid var(--border);background:var(--surface2);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none"></select>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeRelModal()">Tancar</button>
-      <button class="btn primary" onclick="saveRelation()">Afegir</button>
+    <!-- coParent row: only shown for parent-of / child-of -->
+    <div id="rp-coparent-row" style="margin-bottom:8px;display:none">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:4px">Altre progenitor/a <span style="color:var(--text3);font-weight:400">(opcional)</span></div>
+      <select id="rp-coparent" style="width:100%;padding:7px 10px;border:1px solid var(--border);background:var(--surface2);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none">
+        <option value="">Sense especificar</option>
+      </select>
     </div>
+    <button onclick="rpAddRelation()" class="btn primary" style="width:100%;justify-content:center">Afegir</button>
   </div>
 </div>
 
@@ -362,7 +380,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
   </div>
   <div class="ctx-item" onclick="ctxAddRelation()">
     <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="4" cy="8" r="2"/><circle cx="12" cy="8" r="2"/><line x1="6" y1="8" x2="10" y2="8"/></svg>
-    Afegir relació
+    Gestionar relacions
   </div>
   <div class="ctx-item" onclick="ctxAddPhoto()">
     <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="3" width="14" height="10" rx="2"/><circle cx="8" cy="8" r="2.5"/><path d="M5 3l1-2h4l1 2"/></svg>
@@ -646,7 +664,7 @@ function renderNodes() {
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="1.8"><rect x="1" y="3" width="14" height="10" rx="2"/><circle cx="8" cy="8" r="2.5"/><path d="M5 3l1-2h4l1 2"/></svg>
         </div>
       </div>
-      <div class="node-name">${gDot}${p.name||''}${p.surname?`<br><span style="font-weight:400;font-size:11px;color:var(--text3)">${p.surname}</span>`:''}
+      <div class="node-name">${gDot}${p.name||''}${p.surname?`<br><span style="font-weight:600;font-size:13px;color:var(--text)">${p.surname}</span>`:''}
       </div>
       ${dateStr||dead?`<div class="node-dates">${cross}${dateStr}</div>`:''}
       <div class="node-actions">
@@ -690,50 +708,102 @@ function renderNodes() {
 function renderConnectors() {
   const svg = document.getElementById('svg-connectors');
   svg.innerHTML = '';
-  const NW = 140, NH = 155;
+  const NW = 140, NH = 155, R = 7;
 
+  const ncx  = p => (p.x||0) + NW/2;
+  const ncy  = p => (p.y||0) + NH/2;
+  const nbot = p => (p.y||0) + NH;
+  const ntop = p => (p.y||0);
+
+  // Precompute rings midpoint for every couple relation
+  const coupleRings = {}; // "id1|id2" -> {rx, ry}
   relations.forEach(rel => {
+    if (rel.type !== 'couple') return;
     const a = people[rel.a], b = people[rel.b];
     if (!a || !b) return;
-    const ax = a.x+NW/2, ay = a.y+NH/2;
-    const bx = b.x+NW/2, by = b.y+NH/2;
+    const ax = ncx(a), ay = ncy(a), bx = ncx(b), by = ncy(b);
+    const mx = (ax+bx)/2, my = (ay+by)/2 - 20;
+    const cmx = 0.25*ax + 0.5*mx + 0.25*bx;
+    const cmy = 0.25*ay + 0.5*my  + 0.25*by;
+    const key = [rel.a, rel.b].sort().join('|');
+    coupleRings[key] = { rx: cmx, ry: cmy };
+  });
+
+  // Draw couple lines + rings
+  relations.forEach(rel => {
+    if (rel.type !== 'couple') return;
+    const a = people[rel.a], b = people[rel.b];
+    if (!a || !b) return;
+    const ax = ncx(a), ay = ncy(a), bx = ncx(b), by = ncy(b);
     const mx = (ax+bx)/2, my = (ay+by)/2;
 
-    if (rel.type === 'couple') {
-      const line = document.createElementNS('http://www.w3.org/2000/svg','path');
-      line.setAttribute('d',`M ${ax} ${ay} Q ${mx} ${my-20}, ${bx} ${by}`);
-      line.setAttribute('class','connector-couple');
-      svg.appendChild(line);
+    const line = document.createElementNS('http://www.w3.org/2000/svg','path');
+    line.setAttribute('d',`M ${ax} ${ay} Q ${mx} ${my-20}, ${bx} ${by}`);
+    line.setAttribute('class','connector-couple');
+    svg.appendChild(line);
 
-      // Anillos entrelazados
-      const R=7, ov=4;
-      const angle = Math.atan2(by-ay, bx-ax);
-      const cmx = 0.25*ax+0.5*mx+0.25*bx;
-      const cmy = 0.25*ay+0.5*(my-20)+0.25*by;
-      const g = document.createElementNS('http://www.w3.org/2000/svg','g');
-      const r1 = document.createElementNS('http://www.w3.org/2000/svg','circle');
-      r1.setAttribute('cx', cmx-(ov/2)*Math.cos(angle));
-      r1.setAttribute('cy', cmy-(ov/2)*Math.sin(angle));
-      r1.setAttribute('r',R); r1.setAttribute('fill','var(--bg)');
-      r1.setAttribute('stroke','#b8945a'); r1.setAttribute('stroke-width','1.8');
-      const r2 = document.createElementNS('http://www.w3.org/2000/svg','circle');
-      r2.setAttribute('cx', cmx+(ov/2)*Math.cos(angle));
-      r2.setAttribute('cy', cmy+(ov/2)*Math.sin(angle));
-      r2.setAttribute('r',R); r2.setAttribute('fill','var(--bg)');
-      r2.setAttribute('stroke','#c4933a'); r2.setAttribute('stroke-width','1.8');
-      g.appendChild(r1); g.appendChild(r2);
-      svg.appendChild(g);
-
-    } else if (rel.type === 'parent-child') {
-      const line = document.createElementNS('http://www.w3.org/2000/svg','path');
-      const sy = a.y+NH, ey = b.y;
-      const d = `M ${ax} ${sy} C ${ax} ${(sy+ey)/2}, ${bx} ${(sy+ey)/2}, ${bx} ${ey}`;
-      line.setAttribute('d',d);
-      line.setAttribute('class','connector-line');
-      svg.appendChild(line);
-    }
-    // sibling: no line drawn
+    const ov = 4;
+    const angle = Math.atan2(by-ay, bx-ax);
+    const key = [rel.a, rel.b].sort().join('|');
+    const { rx: cmx, ry: cmy } = coupleRings[key];
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    const r1 = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    r1.setAttribute('cx', cmx-(ov/2)*Math.cos(angle));
+    r1.setAttribute('cy', cmy-(ov/2)*Math.sin(angle));
+    r1.setAttribute('r',R); r1.setAttribute('fill','var(--bg)');
+    r1.setAttribute('stroke','#b8945a'); r1.setAttribute('stroke-width','1.8');
+    const r2 = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    r2.setAttribute('cx', cmx+(ov/2)*Math.cos(angle));
+    r2.setAttribute('cy', cmy+(ov/2)*Math.sin(angle));
+    r2.setAttribute('r',R); r2.setAttribute('fill','var(--bg)');
+    r2.setAttribute('stroke','#c4933a'); r2.setAttribute('stroke-width','1.8');
+    g.appendChild(r1); g.appendChild(r2);
+    svg.appendChild(g);
   });
+
+  // Draw parent-child lines.
+  // Origin = rings midpoint between parent and coParent (if both exist and have a couple relation),
+  //          OR simple midpoint between parent and coParent (if no couple relation — e.g. divorced),
+  //          OR bottom-centre of parent alone (if no coParent set).
+  relations.forEach(rel => {
+    if (rel.type !== 'parent-child') return;
+    const parent = people[rel.a];
+    const child  = people[rel.b];
+    if (!parent || !child) return;
+
+    const coParentId = rel.coParent || null;
+    const coParent   = coParentId ? people[coParentId] : null;
+
+    let ox, oy;
+
+    if (coParent) {
+      // Check if there is an active couple relation between parent and coParent
+      const coupleKey = [rel.a, coParentId].sort().join('|');
+      if (coupleRings[coupleKey]) {
+        // Surt dels anells
+        ox = coupleRings[coupleKey].rx;
+        oy = coupleRings[coupleKey].ry + R + 2;
+      } else {
+        // No estan casats ara — surt del punt mig entre els dos (sense anells)
+        ox = (ncx(parent) + ncx(coParent)) / 2;
+        oy = (nbot(parent) + nbot(coParent)) / 2;
+      }
+    } else {
+      // Sense co-progenitor — surt del centre-baix del pare
+      ox = ncx(parent);
+      oy = nbot(parent);
+    }
+
+    const dx = ncx(child);
+    const dy = ntop(child);
+    const midY = oy + (dy - oy) * 0.5;
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d', `M ${ox} ${oy} C ${ox} ${midY}, ${dx} ${midY}, ${dx} ${dy}`);
+    path.setAttribute('class','connector-line');
+    svg.appendChild(path);
+  });
+  // sibling: no line drawn
 }
 
 function renderSidebar() {
@@ -814,6 +884,11 @@ function openProfileModal(id) {
   selectedId = id;
   renderSidebar();
   document.querySelectorAll('.person-node').forEach(n=>n.classList.toggle('selected',n.id==='node-'+id));
+  // If relation panel is open, sync it to this person
+  if (relPanelOpen) {
+    document.getElementById('rp-person').value = id;
+    renderRelPanel();
+  }
 }
 function closeProfileModal() {
   document.getElementById('profile-modal').classList.remove('open');
@@ -961,56 +1036,226 @@ function profilePhotoUpload() {
 }
 
 // ════════════════════════════════════════════
-// RELATION MODAL
+// RELATION PANEL (person-centric)
 // ════════════════════════════════════════════
-function openRelModal() {
-  fillRelSelects();
-  renderRelList();
-  document.getElementById('rel-modal').classList.add('open');
-}
-function closeRelModal() {
-  document.getElementById('rel-modal').classList.remove('open');
+let relPanelOpen = false;
+
+function openRelPanel(preselectId) {
+  relPanelOpen = true;
+  document.getElementById('rel-panel').style.transform = 'translateX(0)';
+  document.getElementById('rel-panel-overlay').style.display = 'block';
+  document.getElementById('btn-rel').classList.add('primary');
+
+  // Populate person selector
+  const sel = document.getElementById('rp-person');
+  const current = preselectId || sel.value || selectedId || Object.keys(people)[0] || '';
+  sel.innerHTML = Object.values(people)
+    .sort((a,b) => (a.name+a.surname).localeCompare(b.name+b.surname))
+    .map(p => `<option value="${p.id}"${p.id===current?' selected':''}>${p.name} ${p.surname||''}</option>`)
+    .join('');
+
+  renderRelPanel();
 }
 
-function fillRelSelects() {
-  ['rel-a','rel-b'].forEach(sid => {
-    document.getElementById(sid).innerHTML =
-      Object.values(people)
-        .sort((a,b)=>(a.name+a.surname).localeCompare(b.name+b.surname))
-        .map(p=>`<option value="${p.id}">${p.name} ${p.surname}</option>`)
-        .join('');
-  });
+function closeRelPanel() {
+  relPanelOpen = false;
+  document.getElementById('rel-panel').style.transform = 'translateX(100%)';
+  document.getElementById('rel-panel-overlay').style.display = 'none';
+  document.getElementById('btn-rel').classList.remove('primary');
 }
 
-function saveRelation() {
-  const type = document.getElementById('rel-type').value;
-  const a = document.getElementById('rel-a').value;
-  const b = document.getElementById('rel-b').value;
-  const date = document.getElementById('rel-date').value;
-  if (a===b) { showToast('Selecciona dues persones diferents'); return; }
-  const dup = relations.find(r=>r.type===type&&((r.a===a&&r.b===b)||(r.a===b&&r.b===a)));
+function renderRelPanel() {
+  const personId = document.getElementById('rp-person').value;
+  const p = people[personId];
+  if (!p) return;
+
+  // Update "amb qui" selector (exclude self)
+  const otherSel = document.getElementById('rp-other');
+  otherSel.innerHTML = Object.values(people)
+    .filter(x => x.id !== personId)
+    .sort((a,b) => (a.name+a.surname).localeCompare(b.name+b.surname))
+    .map(x => `<option value="${x.id}">${x.name} ${x.surname||''}</option>`)
+    .join('');
+
+  // Show/hide coParent row based on current type selection
+  rpTypeChanged();
+
+  // Build relations for this person
+  const myRels = relations.filter(r => r.a === personId || r.b === personId);
+
+  // Categorise
+  const couples   = myRels.filter(r => r.type === 'couple');
+  const parents   = myRels.filter(r => r.type === 'parent-child' && r.b === personId); // I am child
+  const children  = myRels.filter(r => r.type === 'parent-child' && r.a === personId); // I am parent
+
+  const body = document.getElementById('rp-body');
+  body.innerHTML = '';
+
+  function pName(id) {
+    const x = people[id];
+    return x ? `${x.name}${x.surname?' '+x.surname:''}` : '?';
+  }
+
+  function relBlock(title, icon, items, emptyMsg) {
+    const section = document.createElement('div');
+    section.style.cssText = 'margin-bottom:18px';
+    section.innerHTML = `<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+      <span style="opacity:.5">${icon}</span>
+      <span style="font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.05em">${title}</span>
+    </div>`;
+
+    if (!items.length) {
+      const empty = document.createElement('div');
+      empty.style.cssText = 'font-size:12px;color:var(--text3);padding:6px 0 2px';
+      empty.textContent = emptyMsg;
+      section.appendChild(empty);
+    } else {
+      items.forEach(rel => {
+        const otherId = rel.a === personId ? rel.b : rel.a;
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:9px;background:var(--surface2);margin-bottom:5px;cursor:pointer;transition:background .12s';
+        row.innerHTML = `
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--accent);flex-shrink:0;overflow:hidden">
+              ${people[otherId]?.photo ? `<img src="${people[otherId].photo}" style="width:100%;height:100%;object-fit:cover">` : ((people[otherId]?.name||'')[0]||'?').toUpperCase()}
+            </div>
+            <span style="font-size:13px;font-weight:500;color:var(--text)">${pName(otherId)}</span>
+          </div>
+          <button data-fid="${rel.firestoreId}" style="width:22px;height:22px;border:none;background:transparent;cursor:pointer;color:var(--text3);display:flex;align-items:center;justify-content:center;border-radius:4px;padding:0;flex-shrink:0">
+            <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
+          </button>`;
+        row.addEventListener('mouseover', () => row.style.background = 'var(--border)');
+        row.addEventListener('mouseout', () => row.style.background = 'var(--surface2)');
+        row.querySelector('button').addEventListener('click', async e => {
+          e.stopPropagation();
+          if (!confirm(`Eliminar relació amb ${pName(otherId)}?`)) return;
+          await dbDeleteRelation(rel.firestoreId);
+          renderRelPanel();
+        });
+        row.addEventListener('click', () => {
+          // Jump to that person in the panel
+          document.getElementById('rp-person').value = otherId;
+          renderRelPanel();
+        });
+        section.appendChild(row);
+      });
+    }
+    body.appendChild(section);
+  }
+
+  const icoParet = `<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="4" r="2.5"/><path d="M4 14c0-3 8-3 8 0"/></svg>`;
+  const icoFill  = `<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="12" r="2.5"/><path d="M4 2c0 3 8 3 8 0"/></svg>`;
+  const icoAnell = `<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#c4933a" stroke-width="1.8"><circle cx="5" cy="8" r="3.5"/><circle cx="11" cy="8" r="3.5"/></svg>`;
+
+  relBlock('Parella', icoAnell, couples, 'Sense parella registrada');
+  relBlock('Pares', icoParet, parents, 'Sense pares registrats');
+
+  // Children section — custom to show coParent
+  const childSection = document.createElement('div');
+  childSection.style.cssText = 'margin-bottom:18px';
+  childSection.innerHTML = `<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+    <span style="opacity:.5">${icoFill}</span>
+    <span style="font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.05em">Fills/es</span>
+  </div>`;
+
+  if (!children.length) {
+    const empty = document.createElement('div');
+    empty.style.cssText = 'font-size:12px;color:var(--text3);padding:6px 0 2px';
+    empty.textContent = 'Sense fills/es registrats';
+    childSection.appendChild(empty);
+  } else {
+    children.forEach(rel => {
+      const childId = rel.b;
+      const coId = rel.coParent || null;
+      const coP = coId ? people[coId] : null;
+
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:9px;background:var(--surface2);margin-bottom:5px;cursor:pointer;transition:background .12s';
+      row.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;min-width:0">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--accent);flex-shrink:0;overflow:hidden">
+            ${people[childId]?.photo ? `<img src="${people[childId].photo}" style="width:100%;height:100%;object-fit:cover">` : ((people[childId]?.name||'')[0]||'?').toUpperCase()}
+          </div>
+          <div style="min-width:0">
+            <div style="font-size:13px;font-weight:500;color:var(--text)">${pName(childId)}</div>
+            ${coP ? `<div style="font-size:11px;color:var(--text3)">amb ${pName(coId)}</div>` : ''}
+          </div>
+        </div>
+        <button data-fid="${rel.firestoreId}" style="width:22px;height:22px;border:none;background:transparent;cursor:pointer;color:var(--text3);display:flex;align-items:center;justify-content:center;border-radius:4px;padding:0;flex-shrink:0">
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
+        </button>`;
+      row.addEventListener('mouseover', () => row.style.background = 'var(--border)');
+      row.addEventListener('mouseout', () => row.style.background = 'var(--surface2)');
+      row.querySelector('button').addEventListener('click', async e => {
+        e.stopPropagation();
+        if (!confirm(`Eliminar relació amb ${pName(childId)}?`)) return;
+        await dbDeleteRelation(rel.firestoreId);
+        renderRelPanel();
+      });
+      row.addEventListener('click', () => {
+        document.getElementById('rp-person').value = childId;
+        renderRelPanel();
+      });
+      childSection.appendChild(row);
+    });
+  }
+  body.appendChild(childSection);
+}
+
+function rpTypeChanged() {
+  const type = document.getElementById('rp-type').value;
+  const row = document.getElementById('rp-coparent-row');
+  row.style.display = (type === 'couple') ? 'none' : 'block';
+  // Repopulate coParent selector
+  rpRefreshCoparent();
+}
+
+function rpRefreshCoparent() {
+  const personId = document.getElementById('rp-person').value;
+  const otherId  = document.getElementById('rp-other').value;
+  const sel = document.getElementById('rp-coparent');
+  sel.innerHTML = '<option value="">Sense especificar</option>' +
+    Object.values(people)
+      .filter(x => x.id !== personId && x.id !== otherId)
+      .sort((a,b) => (a.name+a.surname).localeCompare(b.name+b.surname))
+      .map(x => `<option value="${x.id}">${x.name} ${x.surname||''}</option>`)
+      .join('');
+}
+
+function rpAddRelation() {
+  const personId   = document.getElementById('rp-person').value;
+  const otherId    = document.getElementById('rp-other').value;
+  const type       = document.getElementById('rp-type').value;
+  const coParentId = document.getElementById('rp-coparent').value || null;
+
+  if (!personId || !otherId || personId === otherId) { showToast('Selecciona dues persones diferents'); return; }
+
+  let a, b, relType;
+  if (type === 'couple') {
+    relType = 'couple'; a = personId; b = otherId;
+  } else if (type === 'parent-of') {
+    // personId is parent, otherId is child
+    relType = 'parent-child'; a = personId; b = otherId;
+  } else {
+    // child-of: personId is child, otherId is parent
+    relType = 'parent-child'; a = otherId; b = personId;
+  }
+
+  const dup = relations.find(r =>
+    r.type === relType && ((r.a === a && r.b === b) || (relType === 'couple' && r.a === b && r.b === a))
+  );
   if (dup) { showToast('La relació ja existeix'); return; }
-  dbSaveRelation({type,a,b,date});
+
+  const relData = { type: relType, a, b, date: '' };
+  if (relType === 'parent-child' && coParentId) relData.coParent = coParentId;
+
+  dbSaveRelation(relData);
   showToast('Relació afegida');
 }
 
+// Keep renderRelList for Firestore listener compatibility (called on snapshot)
 function renderRelList() {
-  const el = document.getElementById('relation-list');
-  el.innerHTML = '';
-  if (!relations.length) {
-    el.innerHTML = '<span style="font-size:12px;color:var(--text3)">Sense relacions encara</span>';
-    return;
-  }
-  const labels = {'parent-child':'→ fill/a','couple':'parella','sibling':'germà/na'};
-  relations.forEach(rel => {
-    const a=people[rel.a], b=people[rel.b];
-    if(!a||!b) return;
-    const badge = document.createElement('div');
-    badge.className='relation-badge';
-    badge.innerHTML=`${a.name} <span style="color:var(--text3)">${labels[rel.type]||rel.type}</span> ${b.name}
-      <button onclick="dbDeleteRelation('${rel.firestoreId}')" title="Eliminar">✕</button>`;
-    el.appendChild(badge);
-  });
+  if (relPanelOpen) renderRelPanel();
 }
 
 // ════════════════════════════════════════════
@@ -1024,14 +1269,14 @@ function openCtx(e,id) {
 }
 function closeCtx(){document.getElementById('ctx-menu').classList.remove('open');ctxTarget=null;}
 function ctxEdit(){if(ctxTarget)startEdit(ctxTarget);closeCtx();}
-function ctxAddRelation(){openRelModal();closeCtx();}
+function ctxAddRelation(){if(ctxTarget)openRelPanel(ctxTarget);closeCtx();}
 function ctxAddPhoto(){
-  // Open profile modal first, photo is changed from there
   if(ctxTarget) openProfileModal(ctxTarget);
   closeCtx();
 }
 function ctxDelete(){if(ctxTarget&&confirm('Eliminar?'))deletePerson(ctxTarget);closeCtx();}
 document.addEventListener('click',e=>{if(!document.getElementById('ctx-menu').contains(e.target))closeCtx();});
+
 
 // ════════════════════════════════════════════
 // DRAG
@@ -1119,9 +1364,53 @@ function toggleSidebar(){
 }
 
 // ════════════════════════════════════════════
-// AUTO LAYOUT
+// LAYOUT: DESA I CARREGA POSICIONS
 // ════════════════════════════════════════════
-function autoLayout(){
+async function saveLayoutAsDefault() {
+  setSyncStatus('busy','Desant vista...');
+  try {
+    const positions = {};
+    Object.values(people).forEach(p => { positions[p.id] = { x: p.x||0, y: p.y||0 }; });
+    await db.collection('meta').doc('layout').set({ positions, savedAt: Date.now() });
+    setSyncStatus('ok','Vista desada');
+    showToast('Vista predeterminada desada');
+  } catch(e) {
+    setSyncStatus('err','Error en desar');
+    console.error(e);
+    showToast('Error en desar la vista');
+  }
+}
+
+async function loadSavedLayout() {
+  try {
+    const doc = await db.collection('meta').doc('layout').get();
+    if (!doc.exists) return false;
+    const { positions } = doc.data();
+    if (!positions) return false;
+    Object.keys(positions).forEach(id => {
+      if (people[id]) {
+        people[id].x = positions[id].x;
+        people[id].y = positions[id].y;
+      }
+    });
+    return true;
+  } catch(e) {
+    console.error(e);
+    return false;
+  }
+}
+
+
+async function autoLayout(){
+  // Primer intenta carregar la vista desada
+  const hasSaved = await loadSavedLayout();
+  if (hasSaved) {
+    vx=40;vy=40;
+    renderAll();
+    showToast('Vista predeterminada carregada');
+    return;
+  }
+  // Si no n'hi ha, calcula l'ordre automàtic
   const NW=150,NH=195,HG=50,VG=80;
   const getChildren=id=>relations.filter(r=>r.type==='parent-child'&&r.a===id).map(r=>r.b);
   const getPartner=id=>{const r=relations.find(r=>r.type==='couple'&&(r.a===id||r.b===id));return r?(r.a===id?r.b:r.a):null;};
@@ -1138,7 +1427,6 @@ function autoLayout(){
   roots.forEach(id=>place(id,0));
   Object.keys(people).filter(id=>!visited.has(id)).forEach(id=>{people[id].x=col*(NW+HG);people[id].y=0;col++;});
 
-  // Save all positions
   const batch = db.batch();
   Object.values(people).forEach(p=>{
     batch.update(db.collection('people').doc(p.id),{x:p.x,y:p.y});
@@ -1181,7 +1469,7 @@ function showToast(msg){
 // KEYBOARD
 // ════════════════════════════════════════════
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){closeModal();closeRelModal();closeProfileModal();closeCtx();}
+  if(e.key==='Escape'){closeModal();closeRelPanel();closeProfileModal();closeCtx();}
   if((e.ctrlKey||e.metaKey)&&e.key==='n'){e.preventDefault();openAddModal();}
 });
 
