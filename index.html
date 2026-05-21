@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="ca">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,8 +18,6 @@
   --shadow-lg:0 6px 32px rgba(60,40,20,.16);
 }
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;user-select:none}
-
-/* TOP BAR */
 .topbar{height:56px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;z-index:100}
 .topbar-logo{font-family:'Playfair Display',serif;font-size:18px;color:var(--accent);margin-right:8px}
 .topbar-logo span{color:var(--gold);font-style:italic}
@@ -34,19 +32,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .z-btn{width:28px;height:28px;border:none;background:transparent;cursor:pointer;border-radius:5px;font-size:16px;color:var(--text2);display:flex;align-items:center;justify-content:center;transition:all .1s}
 .z-btn:hover{background:var(--surface);color:var(--text)}
 .z-label{font-size:12px;color:var(--text3);min-width:38px;text-align:center}
-
-/* SYNC */
 .sync-dot{width:7px;height:7px;border-radius:50%;background:#bbb;transition:background .4s;flex-shrink:0}
 .sync-dot.ok{background:#5a9a5a}
 .sync-dot.busy{background:var(--gold);animation:blink .7s infinite}
 .sync-dot.err{background:var(--danger)}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 .sync-lbl{font-size:11px;color:var(--text3)}
-
-/* LAYOUT */
 .main{display:flex;flex:1;overflow:hidden}
-
-/* SIDEBAR */
 .sidebar{width:260px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;z-index:10;transition:width .25s ease}
 .sidebar.collapsed{width:0}
 .sidebar-inner{width:260px;display:flex;flex-direction:column;height:100%;overflow:hidden}
@@ -73,30 +65,20 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .stat-box{background:var(--surface2);border-radius:8px;padding:8px 10px;text-align:center}
 .stat-num{font-size:18px;font-weight:500;color:var(--accent)}
 .stat-label{font-size:11px;color:var(--text3)}
-
-/* FLOATING REOPEN BUTTON */
-.panel-reopen-btn{
-  position:absolute;left:12px;top:12px;z-index:200;
-  width:36px;height:36px;border-radius:9px;
-  background:var(--surface);border:1px solid var(--border);
-  box-shadow:var(--shadow);cursor:pointer;
-  display:none;align-items:center;justify-content:center;
-  color:var(--text2);transition:all .15s;
-}
+.panel-reopen-btn{position:absolute;left:12px;top:12px;z-index:200;width:36px;height:36px;border-radius:9px;background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow);cursor:pointer;display:none;align-items:center;justify-content:center;color:var(--text2);transition:all .15s}
 .panel-reopen-btn:hover{background:var(--accent-light);border-color:var(--border2);color:var(--accent)}
 .panel-reopen-btn.visible{display:flex}
-
-/* CANVAS */
 .canvas-wrap{flex:1;position:relative;overflow:hidden;background:var(--bg)}
 .canvas-grid{position:absolute;inset:0;background-image:radial-gradient(circle,var(--border) 1px,transparent 1px);background-size:28px 28px;opacity:.5;pointer-events:none}
 #tree-canvas{position:absolute;top:0;left:0;pointer-events:none;overflow:visible}
 .tree-viewport{position:absolute;top:0;left:0;transform-origin:0 0}
-
-/* PERSON NODE */
 .person-node{position:absolute;width:140px;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:14px 12px 12px;cursor:grab;transition:box-shadow .18s,border-color .18s,transform .12s;box-shadow:var(--shadow);text-align:center}
 .person-node:hover{box-shadow:var(--shadow-lg);border-color:var(--border2)}
 .person-node.selected{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,92,62,.18),var(--shadow-lg)}
 .person-node.dragging{cursor:grabbing;z-index:999;box-shadow:var(--shadow-lg);transform:scale(1.03)}
+/* Selection mode: nodes pulse to invite clicking */
+.person-node.pick-mode{cursor:crosshair;border-color:var(--gold);animation:pickPulse 1.2s infinite}
+@keyframes pickPulse{0%,100%{box-shadow:0 0 0 0 rgba(196,147,58,.4)}60%{box-shadow:0 0 0 6px rgba(196,147,58,0)}}
 .node-avatar{width:52px;height:52px;border-radius:50%;margin:0 auto 8px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:500;color:var(--accent);overflow:hidden;border:2px solid var(--border);position:relative}
 .node-avatar img{width:100%;height:100%;object-fit:cover}
 .node-avatar .upload-hint{display:none}
@@ -109,23 +91,25 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .node-action-btn{width:24px;height:24px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .1s;color:var(--text2)}
 .node-action-btn:hover{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
 .node-action-btn.del:hover{background:#fde8e8;border-color:var(--danger);color:var(--danger)}
-
-/* CONNECTORS */
 .connector-line{fill:none;stroke:var(--border2);stroke-width:1.8}
 .connector-couple{fill:none;stroke:var(--gold);stroke-width:1.8;stroke-dasharray:5 3}
-
-/* GENDER DOT */
 .gender-tag{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:3px;flex-shrink:0}
 .gender-m{background:#5b7fad}
 .gender-f{background:#b56d8a}
 .gender-o{background:var(--border2)}
-
-/* LEGEND */
 .legend{position:absolute;bottom:16px;left:16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;z-index:50;font-size:11px;color:var(--text2)}
 .legend-row{display:flex;align-items:center;gap:7px;margin-bottom:4px}
 .legend-row:last-child{margin-bottom:0}
 .leg-line{width:24px;height:2px;background:var(--border2)}
-
+/* PICK MODE BANNER */
+.pick-banner{
+  position:fixed;top:56px;left:0;right:0;z-index:1500;
+  background:var(--gold);color:#fff;
+  display:none;align-items:center;justify-content:space-between;
+  padding:10px 20px;font-size:14px;font-weight:500;
+  box-shadow:0 2px 12px rgba(60,40,20,.2);
+}
+.pick-banner.active{display:flex}
 /* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(30,25,18,.55);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
 .modal-overlay.open{opacity:1;pointer-events:all}
@@ -149,8 +133,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .btn:hover{background:var(--border);color:var(--text)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .btn.primary:hover{background:#6a4d33}
-
-/* CONTEXT MENU */
 .ctx-menu{position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-lg);z-index:2000;min-width:180px;padding:6px;display:none}
 .ctx-menu.open{display:block}
 .ctx-item{padding:8px 12px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text);display:flex;align-items:center;gap:8px;transition:background .1s}
@@ -158,34 +140,38 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .ctx-item.danger{color:var(--danger)}
 .ctx-item.danger:hover{background:#fde8e8}
 .ctx-sep{height:1px;background:var(--border);margin:4px 0}
-
-/* RELATION BADGE */
-.relation-badge{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:3px 10px 3px 6px;font-size:12px;color:var(--text2);margin:3px}
-.relation-badge button{border:none;background:none;cursor:pointer;color:var(--text3);font-size:13px;line-height:1}
-.relation-badge button:hover{color:var(--danger)}
-#relation-list{min-height:32px;display:flex;flex-wrap:wrap;gap:4px}
-
-/* TOAST */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:#fff;padding:10px 20px;border-radius:9px;font-size:13px;z-index:3000;transition:transform .3s;pointer-events:none}
 .toast.show{transform:translateX(-50%) translateY(0)}
-
-/* LOADING */
 .loading-overlay{position:fixed;inset:0;background:rgba(247,244,238,.92);z-index:5000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
 .loading-overlay.hidden{display:none}
 .loading-spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-text{font-size:13px;color:var(--text2)}
+/* REL PANEL */
+.rp-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.rp-section-title{display:flex;align-items:center;gap:6px}
+.rp-add-btn{display:flex;align-items:center;gap:4px;padding:3px 10px;border:1px solid var(--border);background:transparent;border-radius:20px;font-size:11px;font-weight:500;color:var(--text3);cursor:pointer;transition:all .12s;font-family:'DM Sans',sans-serif}
+.rp-add-btn:hover{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+.rp-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:9px;background:var(--surface2);margin-bottom:5px;cursor:pointer;transition:background .12s}
+.rp-row:hover{background:var(--border)}
+.rp-del{width:22px;height:22px;border:none;background:transparent;cursor:pointer;color:var(--text3);display:flex;align-items:center;justify-content:center;border-radius:4px;padding:0;flex-shrink:0;transition:color .1s}
+.rp-del:hover{color:var(--danger)}
+.rp-empty{font-size:12px;color:var(--text3);padding:4px 0 8px}
 </style>
 </head>
 <body>
 
-<!-- LOADING -->
 <div class="loading-overlay" id="loading">
   <div class="loading-spinner"></div>
   <div class="loading-text" id="loading-text">Connectant amb Firestore...</div>
 </div>
 
-<!-- TOP BAR -->
+<!-- PICK MODE BANNER -->
+<div class="pick-banner" id="pick-banner">
+  <span id="pick-label">Clica una persona de l'arbre</span>
+  <button onclick="cancelPickMode()" style="background:rgba(255,255,255,.25);border:none;border-radius:6px;padding:5px 14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer">Cancel·lar</button>
+</div>
+
 <div class="topbar">
   <div class="topbar-logo">Arbre</div>
   <div class="topbar-sep"></div>
@@ -202,7 +188,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>
     Auto-ordenar
   </button>
-  <button class="tb-btn" onclick="saveLayoutAsDefault()" title="Desa la posició actual de cada targeta com a predeterminada">
+  <button class="tb-btn" onclick="saveLayoutAsDefault()">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 2h9l3 3v9H2z"/><rect x="5" y="9" width="6" height="5"/><rect x="4" y="2" width="5" height="4"/></svg>
     Desa vista
   </button>
@@ -225,7 +211,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 </div>
 
 <div class="main">
-  <!-- SIDEBAR -->
   <div class="sidebar" id="sidebar">
     <div class="sidebar-inner">
       <div class="sidebar-header">
@@ -236,7 +221,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
       </div>
       <div class="search-wrap">
         <span class="search-icon"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6.5" cy="6.5" r="4.5"/><line x1="10.5" y1="10.5" x2="14" y2="14"/></svg></span>
-        <input class="search-input" type="text" placeholder="Cercar..." oninput="filterList(this.value)" id="search-input">
+        <input class="search-input" type="text" placeholder="Cercar..." oninput="filterList()" id="search-input">
       </div>
       <div class="person-list" id="person-list"></div>
       <div class="sidebar-footer">
@@ -248,27 +233,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
     </div>
   </div>
 
-  <!-- CANVAS -->
   <div class="canvas-wrap" id="canvas-wrap"
-    onmousedown="startPan(event)"
-    onmousemove="doPan(event)"
-    onmouseup="endPan(event)"
-    onmouseleave="endPan(event)"
-    onwheel="handleWheel(event)"
-    oncontextmenu="return false">
+    onmousedown="startPan(event)" onmousemove="doPan(event)"
+    onmouseup="endPan(event)" onmouseleave="endPan(event)"
+    onwheel="handleWheel(event)" oncontextmenu="return false">
 
-    <!-- Botón flotante para reabrir el panel cuando está oculto -->
-    <button class="panel-reopen-btn" id="panel-reopen-btn" onclick="toggleSidebar()" title="Mostra el tauler de persones">
+    <button class="panel-reopen-btn" id="panel-reopen-btn" onclick="toggleSidebar()" title="Mostra el tauler">
       <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,4 10,8 6,12"/></svg>
     </button>
-
     <div class="canvas-grid"></div>
     <svg id="tree-canvas" width="100%" height="100%" style="overflow:visible;position:absolute;top:0;left:0;pointer-events:none;transform-origin:0 0">
       <g id="svg-connectors"></g>
     </svg>
     <div class="tree-viewport" id="tree-viewport"></div>
-
-    <!-- Legend -->
     <div class="legend">
       <div class="legend-row"><div class="leg-line"></div> Pare / fill</div>
       <div class="legend-row">
@@ -322,54 +299,18 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
   </div>
 </div>
 
-<!-- RELATION PANEL (person-centric, slides in from right) -->
-<div id="rel-panel-overlay" onclick="if(event.target===this)closeRelPanel()" style="position:fixed;inset:0;z-index:900;display:none;pointer-events:all"></div>
-<div id="rel-panel" style="
-  position:fixed;top:56px;right:0;bottom:0;width:340px;
-  background:var(--surface);border-left:1px solid var(--border);
-  z-index:901;display:flex;flex-direction:column;
-  transform:translateX(100%);transition:transform .25s ease;
-  box-shadow:-4px 0 24px rgba(60,40,20,.10);
-">
-  <!-- Header: person selector -->
+<!-- RELATION PANEL -->
+<div id="rel-panel-overlay" onclick="console.log('[OVERLAY click] pickMode=',pickMode); if(!pickMode)closeRelPanel();" style="position:fixed;inset:0;z-index:900;display:none"></div>
+<div id="rel-panel" style="position:fixed;top:56px;right:0;bottom:0;width:340px;background:var(--surface);border-left:1px solid var(--border);z-index:901;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease;box-shadow:-4px 0 24px rgba(60,40,20,.10)">
   <div style="padding:16px 18px 12px;border-bottom:1px solid var(--border);flex-shrink:0">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-      <div style="font-family:'Playfair Display',serif;font-size:16px;color:var(--text)">Relacions</div>
+      <div style="font-family:'Playfair Display',serif;font-size:16px;color:var(--text)" id="rp-title">Relacions</div>
       <button onclick="closeRelPanel()" style="width:28px;height:28px;border:1px solid var(--border);background:var(--surface2);border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:14px">✕</button>
     </div>
-    <div style="font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Persona seleccionada</div>
+    <div style="font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Persona</div>
     <select id="rp-person" onchange="renderRelPanel()" style="width:100%;padding:9px 12px;border:1px solid var(--border);background:var(--surface2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none"></select>
   </div>
-
-  <!-- Relations display -->
-  <div style="flex:1;overflow-y:auto;padding:14px 18px" id="rp-body"></div>
-
-  <!-- Add new relation -->
-  <div style="padding:14px 18px;border-top:1px solid var(--border);flex-shrink:0;background:var(--surface)">
-    <div style="font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Afegir relació</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-      <div>
-        <div style="font-size:11px;color:var(--text3);margin-bottom:4px">Tipus</div>
-        <select id="rp-type" onchange="rpTypeChanged()" style="width:100%;padding:7px 10px;border:1px solid var(--border);background:var(--surface2);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none">
-          <option value="couple">Parella</option>
-          <option value="parent-of">És pare/mare de</option>
-          <option value="child-of">És fill/a de</option>
-        </select>
-      </div>
-      <div>
-        <div style="font-size:11px;color:var(--text3);margin-bottom:4px">Amb qui</div>
-        <select id="rp-other" style="width:100%;padding:7px 10px;border:1px solid var(--border);background:var(--surface2);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none"></select>
-      </div>
-    </div>
-    <!-- coParent row: only shown for parent-of / child-of -->
-    <div id="rp-coparent-row" style="margin-bottom:8px;display:none">
-      <div style="font-size:11px;color:var(--text3);margin-bottom:4px">Altre progenitor/a <span style="color:var(--text3);font-weight:400">(opcional)</span></div>
-      <select id="rp-coparent" style="width:100%;padding:7px 10px;border:1px solid var(--border);background:var(--surface2);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none">
-        <option value="">Sense especificar</option>
-      </select>
-    </div>
-    <button onclick="rpAddRelation()" class="btn primary" style="width:100%;justify-content:center">Afegir</button>
-  </div>
+  <div style="flex:1;overflow-y:auto;padding:16px 18px" id="rp-body"></div>
 </div>
 
 <!-- CONTEXT MENU -->
@@ -378,11 +319,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
     <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 2l3 3-8 8H3v-3L11 2z"/></svg>
     Editar persona
   </div>
-  <div class="ctx-item" onclick="ctxAddRelation()">
+  <div class="ctx-item" onclick="ctxRelations()">
     <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="4" cy="8" r="2"/><circle cx="12" cy="8" r="2"/><line x1="6" y1="8" x2="10" y2="8"/></svg>
-    Gestionar relacions
+    Relacions
   </div>
-  <div class="ctx-item" onclick="ctxAddPhoto()">
+  <div class="ctx-item" onclick="ctxPhoto()">
     <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="3" width="14" height="10" rx="2"/><circle cx="8" cy="8" r="2.5"/><path d="M5 3l1-2h4l1 2"/></svg>
     Canviar foto
   </div>
@@ -400,14 +341,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
       <button class="modal-close" onclick="closeProfileModal()">✕</button>
     </div>
     <div class="modal-body" style="padding:0 24px 24px">
-      <div id="pm-photo" onclick="profilePhotoUpload()" title="Canviar foto" style="width:110px;height:110px;border-radius:50%;margin:0 auto 16px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:500;color:var(--accent);overflow:hidden;border:3px solid var(--border);cursor:pointer;position:relative">
-      </div>
+      <div id="pm-photo" onclick="profilePhotoUpload()" title="Canviar foto" style="width:110px;height:110px;border-radius:50%;margin:0 auto 16px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:500;color:var(--accent);overflow:hidden;border:3px solid var(--border);cursor:pointer"></div>
       <div style="font-size:11px;color:var(--text3);margin-bottom:12px;margin-top:-10px">Prem la foto per canviar-la</div>
       <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--text);margin-bottom:6px" id="pm-name"></div>
       <div style="font-size:13px;color:var(--text2);margin-bottom:3px" id="pm-age"></div>
       <div style="font-size:12px;color:var(--text3)" id="pm-place"></div>
       <div style="display:flex;gap:8px;margin-top:18px;justify-content:center">
         <button class="btn primary" onclick="editFromProfile()">Editar</button>
+        <button class="btn" onclick="pmOpenRelations()">Relacions</button>
         <button class="btn" onclick="closeProfileModal()">Tancar</button>
       </div>
     </div>
@@ -416,618 +357,455 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 
 <div class="toast" id="toast"></div>
 
-<!-- Firebase SDK (compat) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
 <script>
-// ════════════════════════════════════════════
-// FIREBASE INIT
-// ════════════════════════════════════════════
+// ── FIREBASE ──
 const firebaseConfig = {
-  apiKey: "AIzaSyB8YHkAH4wIOe7gBYmCwZ8gn95yNl6sGUM",
-  authDomain: "monica-bcd4f.firebaseapp.com",
-  projectId: "monica-bcd4f",
-  storageBucket: "monica-bcd4f.firebasestorage.app",
-  messagingSenderId: "310927692326",
-  appId: "1:310927692326:web:cdaa17f554e66645780ce7",
-  measurementId: "G-YDNDNM6BEE"
+  apiKey:"AIzaSyB8YHkAH4wIOe7gBYmCwZ8gn95yNl6sGUM",
+  authDomain:"monica-bcd4f.firebaseapp.com",
+  projectId:"monica-bcd4f",
+  storageBucket:"monica-bcd4f.firebasestorage.app",
+  messagingSenderId:"310927692326",
+  appId:"1:310927692326:web:cdaa17f554e66645780ce7"
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// ════════════════════════════════════════════
-// STATE
-// ════════════════════════════════════════════
-let people = {};
-let relations = [];
-let selectedId = null;
-let editingId = null;
-let pendingPhoto = null;
-let profileId = null;
-let ctxTarget = null;
+// ── STATE ──
+let people = {}, relations = [];
+let selectedId = null, editingId = null, pendingPhoto = null, profileId = null, ctxTarget = null;
+let vx=160,vy=80,vscale=1;
+let panning=false,panStart={x:0,y:0},panOrigin={x:0,y:0};
+let dragging=null,dragOffset={x:0,y:0},dragSaveTimer=null;
+let sidebarOpen=true,relPanelOpen=false;
 
-// Pan/zoom
-let vx = 160, vy = 80, vscale = 1;
-let panning = false, panStart = {x:0,y:0}, panOrigin = {x:0,y:0};
+// ── PICK MODE ──
+let pickMode = null;
 
-// Drag
-let dragging = null, dragOffset = {x:0,y:0};
-let dragSaveTimer = null;
-
-// Sidebar
-let sidebarOpen = true;
-
-// ════════════════════════════════════════════
-// SYNC STATUS HELPERS
-// ════════════════════════════════════════════
-function setSyncStatus(state, msg) {
-  const dot = document.getElementById('sync-dot');
-  const lbl = document.getElementById('sync-lbl');
-  dot.className = 'sync-dot ' + state;
-  lbl.textContent = msg;
+function startPickMode(relType, label) {
+  console.log('[PICK] Starting pick mode:', relType, label);
+  pickMode = { relType };
+  document.getElementById('pick-banner').classList.add('active');
+  document.getElementById('pick-label').textContent = label;
+  // Hide the overlay entirely so it cannot intercept canvas clicks
+  document.getElementById('rel-panel-overlay').style.display = 'none';
+  document.querySelectorAll('.person-node').forEach(n => n.classList.add('pick-mode'));
 }
 
-// ════════════════════════════════════════════
-// FIRESTORE LOAD + REALTIME LISTENER
-// ════════════════════════════════════════════
-function startListening() {
+function cancelPickMode() {
+  console.log('[PICK] Cancelled');
+  pickMode = null;
+  document.getElementById('pick-banner').classList.remove('active');
+  // Restore overlay if panel is still open
+  if (relPanelOpen) document.getElementById('rel-panel-overlay').style.display = 'block';
+  document.querySelectorAll('.person-node').forEach(n => n.classList.remove('pick-mode'));
+}
+
+function handlePickClick(clickedId) {
+  console.log('[PICK] handlePickClick called, clickedId=', clickedId, 'pickMode=', pickMode);
+  if (!pickMode) { console.warn('[PICK] pickMode is null, ignoring'); return; }
+  const personId = document.getElementById('rp-person').value;
+  const { relType } = pickMode;
+  console.log('[PICK] personId=', personId, 'relType=', relType);
+  cancelPickMode();
+
+  if (clickedId === personId) { showToast('No pots relacionar-te amb tu mateix'); return; }
+
+  let relData;
+  if (relType === 'couple') {
+    const dup = relations.find(r => r.type==='couple' && ((r.a===personId&&r.b===clickedId)||(r.a===clickedId&&r.b===personId)));
+    if (dup) { showToast('La relació ja existeix'); return; }
+    relData = { type:'couple', a:personId, b:clickedId, date:'' };
+  } else if (relType === 'parent-child') {
+    const dup = relations.find(r => r.type==='parent-child' && r.a===personId && r.b===clickedId);
+    if (dup) { showToast('La relació ja existeix'); return; }
+    relData = { type:'parent-child', a:personId, b:clickedId, date:'' };
+  } else if (relType === 'parent-child-reverse') {
+    const dup = relations.find(r => r.type==='parent-child' && r.a===clickedId && r.b===personId);
+    if (dup) { showToast('La relació ja existeix'); return; }
+    relData = { type:'parent-child', a:clickedId, b:personId, date:'' };
+  }
+  if (relData) { console.log('[PICK] Saving relation:', relData); dbSaveRelation(relData); showToast('Relació afegida'); }
+}
+
+// ── SYNC ──
+function setSyncStatus(s,m){
+  document.getElementById('sync-dot').className='sync-dot '+s;
+  document.getElementById('sync-lbl').textContent=m;
+}
+
+// ── FIRESTORE ──
+function startListening(){
   setSyncStatus('busy','Carregant...');
+  db.collection('people').onSnapshot(snap=>{
+    people={};
+    snap.forEach(doc=>{ people[doc.id]={id:doc.id,...doc.data()}; });
+    if(snap.empty){ seedInitialData(); return; }
+    renderAll(); setSyncStatus('ok','Sincronitzat'); hideLoading();
+  },err=>{ setSyncStatus('err','Error de connexió'); hideLoading(); showToast('Error en connectar'); });
 
-  // Listen to people collection
-  db.collection('people').onSnapshot(snap => {
-    people = {};
-    snap.forEach(doc => {
-      people[doc.id] = { id: doc.id, ...doc.data() };
-    });
-
-    // If DB is empty, seed with initial data
-    if (snap.empty) {
-      seedInitialData();
-      return;
-    }
-
-    renderAll();
-    setSyncStatus('ok','Sincronitzat');
-    hideLoading();
-  }, err => {
-    setSyncStatus('err','Error de connexió');
-    console.error(err);
-    hideLoading();
-    showToast('Error en connectar amb Firestore');
-  });
-
-  // Listen to relations collection
-  db.collection('relations').onSnapshot(snap => {
-    relations = [];
-    snap.forEach(doc => {
-      relations.push({ firestoreId: doc.id, ...doc.data() });
-    });
+  db.collection('relations').onSnapshot(snap=>{
+    relations=[];
+    snap.forEach(doc=>{ relations.push({firestoreId:doc.id,...doc.data()}); });
     renderConnectors();
-    renderRelList();
-  }, err => {
-    console.error('relations listener error:', err);
+    if(relPanelOpen) renderRelPanel();
   });
 }
 
-function hideLoading() {
-  document.getElementById('loading').classList.add('hidden');
-}
+function hideLoading(){ document.getElementById('loading').classList.add('hidden'); }
 
-// ════════════════════════════════════════════
-// SEED INITIAL DATA (Mónica, Xavier, Ares, Jana)
-// ════════════════════════════════════════════
-async function seedInitialData() {
-  document.getElementById('loading-text').textContent = 'Creant arbre inicial...';
+async function seedInitialData(){
+  document.getElementById('loading-text').textContent='Creant arbre inicial...';
   setSyncStatus('busy','Desant...');
-  try {
-    const batch = db.batch();
-
-    const pMonicaRef = db.collection('people').doc('p-monica');
-    batch.set(pMonicaRef, {
-      name:'Mónica', surname:'Álvarez', birth:'', death:'', gender:'f',
-      birthplace:'', photo:null, x:80, y:80
-    });
-
-    const pXavierRef = db.collection('people').doc('p-xavier');
-    batch.set(pXavierRef, {
-      name:'Xavier', surname:'Pont', birth:'', death:'', gender:'m',
-      birthplace:'', photo:null, x:280, y:80
-    });
-
-    const pAresRef = db.collection('people').doc('p-ares');
-    batch.set(pAresRef, {
-      name:'Ares', surname:'Pont', birth:'', death:'', gender:'f',
-      birthplace:'', photo:null, x:80, y:300
-    });
-
-    const pJanaRef = db.collection('people').doc('p-jana');
-    batch.set(pJanaRef, {
-      name:'Jana', surname:'Pont', birth:'', death:'', gender:'f',
-      birthplace:'', photo:null, x:280, y:300
-    });
-
-    await batch.commit();
-
-    // Relations
-    await db.collection('relations').add({ type:'couple', a:'p-monica', b:'p-xavier', date:'' });
-    await db.collection('relations').add({ type:'parent-child', a:'p-monica', b:'p-ares', date:'' });
-    await db.collection('relations').add({ type:'parent-child', a:'p-monica', b:'p-jana', date:'' });
-    await db.collection('relations').add({ type:'sibling', a:'p-ares', b:'p-jana', date:'' });
-
+  try{
+    const b=db.batch();
+    b.set(db.collection('people').doc('p-monica'),{name:'Mónica',surname:'Álvarez',birth:'',death:'',gender:'f',birthplace:'',photo:null,x:80,y:80});
+    b.set(db.collection('people').doc('p-xavier'),{name:'Xavier',surname:'Pont',birth:'',death:'',gender:'m',birthplace:'',photo:null,x:280,y:80});
+    b.set(db.collection('people').doc('p-ares'),{name:'Ares',surname:'Pont',birth:'',death:'',gender:'f',birthplace:'',photo:null,x:80,y:300});
+    b.set(db.collection('people').doc('p-jana'),{name:'Jana',surname:'Pont',birth:'',death:'',gender:'f',birthplace:'',photo:null,x:280,y:300});
+    await b.commit();
+    await db.collection('relations').add({type:'couple',a:'p-monica',b:'p-xavier',date:''});
+    await db.collection('relations').add({type:'parent-child',a:'p-monica',b:'p-ares',date:''});
+    await db.collection('relations').add({type:'parent-child',a:'p-monica',b:'p-jana',date:''});
     showToast('Arbre inicial creat');
-  } catch(e) {
-    console.error(e);
-    setSyncStatus('err','Error en desar');
-    showToast('Error en crear les dades inicials');
-    hideLoading();
-  }
+  }catch(e){ setSyncStatus('err','Error'); showToast('Error en crear dades'); hideLoading(); }
 }
 
-// ════════════════════════════════════════════
-// FIRESTORE WRITE HELPERS
-// ════════════════════════════════════════════
-async function dbSavePerson(person) {
+async function dbSavePerson(p){
   setSyncStatus('busy','Desant...');
-  try {
-    const { id, ...data } = person;
-    await db.collection('people').doc(id).set(data);
-    setSyncStatus('ok','Desat');
-  } catch(e) {
-    setSyncStatus('err','Error en desar');
-    console.error(e);
-    showToast('Error en desar a Firestore');
-  }
+  try{ const{id,...d}=p; await db.collection('people').doc(id).set(d); setSyncStatus('ok','Desat'); }
+  catch(e){ setSyncStatus('err','Error'); showToast('Error en desar'); }
 }
 
-async function dbDeletePerson(id) {
+async function dbDeletePerson(id){
   setSyncStatus('busy','Eliminant...');
-  try {
+  try{
     await db.collection('people').doc(id).delete();
-    // Delete associated relations
-    const snap = await db.collection('relations')
-      .where('a','==',id).get();
-    const snap2 = await db.collection('relations')
-      .where('b','==',id).get();
-    const delBatch = db.batch();
-    snap.docs.forEach(d => delBatch.delete(d.ref));
-    snap2.docs.forEach(d => delBatch.delete(d.ref));
-    await delBatch.commit();
-    setSyncStatus('ok','Eliminat');
-  } catch(e) {
-    setSyncStatus('err','Error');
-    console.error(e);
-  }
+    const [s1,s2]=await Promise.all([db.collection('relations').where('a','==',id).get(),db.collection('relations').where('b','==',id).get()]);
+    const b=db.batch();
+    s1.docs.forEach(d=>b.delete(d.ref)); s2.docs.forEach(d=>b.delete(d.ref));
+    await b.commit(); setSyncStatus('ok','Eliminat');
+  }catch(e){ setSyncStatus('err','Error'); }
 }
 
-async function dbSaveRelation(rel) {
-  setSyncStatus('busy','Desant relació...');
-  try {
-    const { firestoreId, ...data } = rel;
-    if (firestoreId) {
-      await db.collection('relations').doc(firestoreId).set(data);
-    } else {
-      await db.collection('relations').add(data);
-    }
+async function dbSaveRelation(rel){
+  setSyncStatus('busy','Desant...');
+  try{
+    const{firestoreId,...d}=rel;
+    if(firestoreId) await db.collection('relations').doc(firestoreId).set(d);
+    else await db.collection('relations').add(d);
     setSyncStatus('ok','Desat');
-  } catch(e) {
-    setSyncStatus('err','Error');
-    console.error(e);
-    showToast('Error en desar la relació');
-  }
+  }catch(e){ setSyncStatus('err','Error'); showToast('Error en desar relació'); }
 }
 
-async function dbDeleteRelation(firestoreId) {
+async function dbDeleteRelation(fid){
   setSyncStatus('busy','Eliminant...');
-  try {
-    await db.collection('relations').doc(firestoreId).delete();
-    setSyncStatus('ok','Eliminat');
-  } catch(e) {
-    setSyncStatus('err','Error');
-    console.error(e);
-  }
+  try{ await db.collection('relations').doc(fid).delete(); setSyncStatus('ok','Eliminat'); }
+  catch(e){ setSyncStatus('err','Error'); }
 }
 
-// ════════════════════════════════════════════
-// RENDER
-// ════════════════════════════════════════════
-function renderAll() {
-  renderNodes();
-  renderConnectors();
-  renderSidebar();
-  updateStats();
-}
+// ── RENDER ──
+function renderAll(){ renderNodes(); renderConnectors(); renderSidebar(); updateStats(); }
 
-function renderNodes() {
-  const vp = document.getElementById('tree-viewport');
-  vp.innerHTML = '';
-  for (const id in people) {
-    const p = people[id];
-    const el = document.createElement('div');
-    el.className = 'person-node' + (id === selectedId ? ' selected' : '');
-    el.id = 'node-' + id;
-    el.style.left = (p.x || 0) + 'px';
-    el.style.top  = (p.y || 0) + 'px';
-
-    const initials = ((p.name||'')[0]||'').toUpperCase() + ((p.surname||'')[0]||'').toUpperCase() || '?';
-    const gDot = p.gender ? `<span class="gender-tag gender-${p.gender}"></span>` : '';
-    const bY = p.birth ? p.birth.split('-')[0] : '';
-    const dY = p.death ? p.death.split('-')[0] : '';
-    const dateStr = bY ? (dY ? `${bY} – ${dY}` : `n. ${bY}`) : '';
-    const dead = !!p.death;
-    const cross = dead ? `<span class="deceased-cross"><svg width="10" height="13" viewBox="0 0 10 13" fill="none"><line x1="5" y1="0" x2="5" y2="13" stroke="#9c9183" stroke-width="1.5"/><line x1="1" y1="3.5" x2="9" y2="3.5" stroke="#9c9183" stroke-width="1.5"/></svg></span>` : '';
-
-    el.innerHTML = `
+function renderNodes(){
+  const vp=document.getElementById('tree-viewport');
+  vp.innerHTML='';
+  for(const id in people){
+    const p=people[id];
+    const el=document.createElement('div');
+    el.className='person-node'+(id===selectedId?' selected':'');
+    el.id='node-'+id;
+    el.style.left=(p.x||0)+'px';
+    el.style.top=(p.y||0)+'px';
+    const ini=((p.name||'')[0]||'').toUpperCase()+((p.surname||'')[0]||'').toUpperCase()||'?';
+    const gDot=p.gender?`<span class="gender-tag gender-${p.gender}"></span>`:'';
+    const bY=p.birth?p.birth.split('-')[0]:'';
+    const dY=p.death?p.death.split('-')[0]:'';
+    const dateStr=bY?(dY?`${bY} – ${dY}`:`n. ${bY}`):'';
+    const dead=!!p.death;
+    const cross=dead?`<span class="deceased-cross"><svg width="10" height="13" viewBox="0 0 10 13" fill="none"><line x1="5" y1="0" x2="5" y2="13" stroke="#9c9183" stroke-width="1.5"/><line x1="1" y1="3.5" x2="9" y2="3.5" stroke="#9c9183" stroke-width="1.5"/></svg></span>`:'';
+    el.innerHTML=`
       <div class="node-avatar${dead?' deceased-avatar':''}">
-        ${p.photo ? `<img src="${p.photo}" alt="">` : initials}
-        <div class="upload-hint" data-id="${id}">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="1.8"><rect x="1" y="3" width="14" height="10" rx="2"/><circle cx="8" cy="8" r="2.5"/><path d="M5 3l1-2h4l1 2"/></svg>
-        </div>
+        ${p.photo?`<img src="${p.photo}" alt="">`:ini}
       </div>
-      <div class="node-name">${gDot}${p.name||''}${p.surname?`<br><span style="font-weight:600;font-size:13px;color:var(--text)">${p.surname}</span>`:''}
-      </div>
+      <div class="node-name">${gDot}${p.name||''}${p.surname?`<br><span style="font-weight:600;font-size:13px;color:var(--text)">${p.surname}</span>`:''}</div>
       ${dateStr||dead?`<div class="node-dates">${cross}${dateStr}</div>`:''}
       <div class="node-actions">
-        <button class="node-action-btn" data-action="edit" data-id="${id}" title="Editar">
+        <button class="node-action-btn" data-action="edit" title="Editar">
           <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 2l3 3-8 8H3v-3L11 2z"/></svg>
         </button>
-        <button class="node-action-btn del" data-action="del" data-id="${id}" title="Eliminar">
+        <button class="node-action-btn del" data-action="del" title="Eliminar">
           <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="2,4 14,4"/><path d="M5 4V2h6v2"/><rect x="3" y="4" width="10" height="10" rx="1"/></svg>
         </button>
       </div>`;
-
-    // (photo upload only via profile modal)
     el.querySelectorAll('[data-action]').forEach(btn=>{
-      btn.addEventListener('mousedown', e=>e.stopPropagation());
-      btn.addEventListener('click', e=>{
+      btn.addEventListener('mousedown',e=>{ if(!pickMode) e.stopPropagation(); });
+      btn.addEventListener('click',e=>{
+        if(pickMode){ e.stopPropagation(); handlePickClick(id); return; }
         e.stopPropagation();
         if(btn.dataset.action==='edit') startEdit(id);
-        if(btn.dataset.action==='del' && confirm('¿Eliminar a '+p.name+'?')) deletePerson(id);
+        if(btn.dataset.action==='del'&&confirm('Eliminar a '+p.name+'?')) deletePerson(id);
       });
     });
-
-    let mdPos = null;
-    el.addEventListener('mousedown', e=>{
-      if(e.button!==0) return;
-      mdPos = {x:e.clientX, y:e.clientY};
-      startDrag(e, id);
+    let mdPos=null;
+    el.addEventListener('mousedown',e=>{
+      if(e.button!==0)return;
+      if(pickMode){ console.log('[PICK] mousedown on node', id); return; }
+      mdPos={x:e.clientX,y:e.clientY};
+      startDrag(e,id);
     });
-    el.addEventListener('click', e=>{
+    el.addEventListener('click',e=>{
       e.stopPropagation();
-      if(!mdPos) return;
-      const dist = Math.hypot(e.clientX-mdPos.x, e.clientY-mdPos.y);
-      if(dist < 5) openProfileModal(id);
-      mdPos = null;
+      console.log('[NODE click] id=', id, 'pickMode=', pickMode, 'mdPos=', mdPos);
+      if(pickMode){ handlePickClick(id); return; }
+      if(!mdPos)return;
+      const dist=Math.hypot(e.clientX-mdPos.x,e.clientY-mdPos.y);
+      mdPos=null;
+      if(dist>5)return;
+      openProfileModal(id);
     });
-    el.addEventListener('contextmenu', e=>{e.preventDefault();e.stopPropagation();openCtx(e,id);});
+    el.addEventListener('contextmenu',e=>{e.preventDefault();e.stopPropagation();openCtx(e,id);});
     vp.appendChild(el);
   }
   applyTransform();
 }
 
-function renderConnectors() {
-  const svg = document.getElementById('svg-connectors');
-  svg.innerHTML = '';
-  const NW = 140, NH = 155, R = 7;
+function renderConnectors(){
+  const svg=document.getElementById('svg-connectors');
+  svg.innerHTML='';
+  const NW=140,NH=155,R=7;
+  const ncx=p=>(p.x||0)+NW/2, ncy=p=>(p.y||0)+NH/2;
+  const nbot=p=>(p.y||0)+NH, ntop=p=>(p.y||0);
 
-  const ncx  = p => (p.x||0) + NW/2;
-  const ncy  = p => (p.y||0) + NH/2;
-  const nbot = p => (p.y||0) + NH;
-  const ntop = p => (p.y||0);
-
-  // Precompute rings midpoint for every couple relation
-  const coupleRings = {}; // "id1|id2" -> {rx, ry}
-  relations.forEach(rel => {
-    if (rel.type !== 'couple') return;
-    const a = people[rel.a], b = people[rel.b];
-    if (!a || !b) return;
-    const ax = ncx(a), ay = ncy(a), bx = ncx(b), by = ncy(b);
-    const mx = (ax+bx)/2, my = (ay+by)/2 - 20;
-    const cmx = 0.25*ax + 0.5*mx + 0.25*bx;
-    const cmy = 0.25*ay + 0.5*my  + 0.25*by;
-    const key = [rel.a, rel.b].sort().join('|');
-    coupleRings[key] = { rx: cmx, ry: cmy };
+  // Precompute couple rings midpoints
+  const coupleRings={};
+  relations.forEach(rel=>{
+    if(rel.type!=='couple')return;
+    const a=people[rel.a],b=people[rel.b];
+    if(!a||!b)return;
+    const ax=ncx(a),ay=ncy(a),bx=ncx(b),by=ncy(b);
+    const mx=(ax+bx)/2,my=(ay+by)/2-20;
+    const cmx=0.25*ax+0.5*mx+0.25*bx;
+    const cmy=0.25*ay+0.5*my+0.25*by;
+    coupleRings[[rel.a,rel.b].sort().join('|')]={rx:cmx,ry:cmy};
   });
 
   // Draw couple lines + rings
-  relations.forEach(rel => {
-    if (rel.type !== 'couple') return;
-    const a = people[rel.a], b = people[rel.b];
-    if (!a || !b) return;
-    const ax = ncx(a), ay = ncy(a), bx = ncx(b), by = ncy(b);
-    const mx = (ax+bx)/2, my = (ay+by)/2;
-
-    const line = document.createElementNS('http://www.w3.org/2000/svg','path');
+  relations.forEach(rel=>{
+    if(rel.type!=='couple')return;
+    const a=people[rel.a],b=people[rel.b];
+    if(!a||!b)return;
+    const ax=ncx(a),ay=ncy(a),bx=ncx(b),by=ncy(b);
+    const mx=(ax+bx)/2,my=(ay+by)/2;
+    const line=document.createElementNS('http://www.w3.org/2000/svg','path');
     line.setAttribute('d',`M ${ax} ${ay} Q ${mx} ${my-20}, ${bx} ${by}`);
     line.setAttribute('class','connector-couple');
     svg.appendChild(line);
-
-    const ov = 4;
-    const angle = Math.atan2(by-ay, bx-ax);
-    const key = [rel.a, rel.b].sort().join('|');
-    const { rx: cmx, ry: cmy } = coupleRings[key];
-    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
-    const r1 = document.createElementNS('http://www.w3.org/2000/svg','circle');
-    r1.setAttribute('cx', cmx-(ov/2)*Math.cos(angle));
-    r1.setAttribute('cy', cmy-(ov/2)*Math.sin(angle));
-    r1.setAttribute('r',R); r1.setAttribute('fill','var(--bg)');
-    r1.setAttribute('stroke','#b8945a'); r1.setAttribute('stroke-width','1.8');
-    const r2 = document.createElementNS('http://www.w3.org/2000/svg','circle');
-    r2.setAttribute('cx', cmx+(ov/2)*Math.cos(angle));
-    r2.setAttribute('cy', cmy+(ov/2)*Math.sin(angle));
-    r2.setAttribute('r',R); r2.setAttribute('fill','var(--bg)');
-    r2.setAttribute('stroke','#c4933a'); r2.setAttribute('stroke-width','1.8');
-    g.appendChild(r1); g.appendChild(r2);
+    const ov=4,angle=Math.atan2(by-ay,bx-ax);
+    const key=[rel.a,rel.b].sort().join('|');
+    const{rx:cmx,ry:cmy}=coupleRings[key];
+    const g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    [[cmx-(ov/2)*Math.cos(angle),cmy-(ov/2)*Math.sin(angle),'#b8945a'],[cmx+(ov/2)*Math.cos(angle),cmy+(ov/2)*Math.sin(angle),'#c4933a']].forEach(([cx,cy,st])=>{
+      const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('cx',cx);c.setAttribute('cy',cy);c.setAttribute('r',R);
+      c.setAttribute('fill','var(--bg)');c.setAttribute('stroke',st);c.setAttribute('stroke-width','1.8');
+      g.appendChild(c);
+    });
     svg.appendChild(g);
   });
 
-  // Draw parent-child lines.
-  // Origin = rings midpoint between parent and coParent (if both exist and have a couple relation),
-  //          OR simple midpoint between parent and coParent (if no couple relation — e.g. divorced),
-  //          OR bottom-centre of parent alone (if no coParent set).
-  relations.forEach(rel => {
-    if (rel.type !== 'parent-child') return;
-    const parent = people[rel.a];
-    const child  = people[rel.b];
-    if (!parent || !child) return;
+  // Draw parent-child lines
+  // New logic: for each child, find ALL their parents.
+  // If 2 parents exist and they have a couple relation → line from rings midpoint.
+  // If 2 parents but no couple → one line from each parent.
+  // If 1 parent → line from that parent's bottom.
 
-    const coParentId = rel.coParent || null;
-    const coParent   = coParentId ? people[coParentId] : null;
-
-    let ox, oy;
-
-    if (coParent) {
-      // Check if there is an active couple relation between parent and coParent
-      const coupleKey = [rel.a, coParentId].sort().join('|');
-      if (coupleRings[coupleKey]) {
-        // Surt dels anells
-        ox = coupleRings[coupleKey].rx;
-        oy = coupleRings[coupleKey].ry + R + 2;
-      } else {
-        // No estan casats ara — surt del punt mig entre els dos (sense anells)
-        ox = (ncx(parent) + ncx(coParent)) / 2;
-        oy = (nbot(parent) + nbot(coParent)) / 2;
-      }
-    } else {
-      // Sense co-progenitor — surt del centre-baix del pare
-      ox = ncx(parent);
-      oy = nbot(parent);
-    }
-
-    const dx = ncx(child);
-    const dy = ntop(child);
-    const midY = oy + (dy - oy) * 0.5;
-
-    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-    path.setAttribute('d', `M ${ox} ${oy} C ${ox} ${midY}, ${dx} ${midY}, ${dx} ${dy}`);
-    path.setAttribute('class','connector-line');
-    svg.appendChild(path);
+  // Build child→parents map
+  const childParents={};
+  relations.forEach(rel=>{
+    if(rel.type!=='parent-child')return;
+    if(!childParents[rel.b])childParents[rel.b]=[];
+    childParents[rel.b].push(rel.a);
   });
-  // sibling: no line drawn
+
+  const drawnChildren=new Set();
+  relations.forEach(rel=>{
+    if(rel.type!=='parent-child')return;
+    const childId=rel.b;
+    if(drawnChildren.has(childId))return;
+    drawnChildren.add(childId);
+
+    const child=people[childId];
+    if(!child)return;
+    const parents=(childParents[childId]||[]).map(id=>people[id]).filter(Boolean);
+    const dx=ncx(child),dy=ntop(child);
+
+    if(parents.length===0)return;
+
+    if(parents.length>=2){
+      const p1=parents[0],p2=parents[1];
+      const coupleKey=[childParents[childId][0],childParents[childId][1]].sort().join('|');
+      if(coupleRings[coupleKey]){
+        // Surt dels anells
+        const{rx,ry}=coupleRings[coupleKey];
+        const ox=rx,oy=ry+R+2;
+        const midY=oy+(dy-oy)*0.5;
+        const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+        path.setAttribute('d',`M ${ox} ${oy} C ${ox} ${midY}, ${dx} ${midY}, ${dx} ${dy}`);
+        path.setAttribute('class','connector-line');
+        svg.appendChild(path);
+      }else{
+        // Un fil de cadascun
+        parents.forEach(par=>{
+          const ox=ncx(par),oy=nbot(par);
+          const midY=oy+(dy-oy)*0.5;
+          const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+          path.setAttribute('d',`M ${ox} ${oy} C ${ox} ${midY}, ${dx} ${midY}, ${dx} ${dy}`);
+          path.setAttribute('class','connector-line');
+          svg.appendChild(path);
+        });
+      }
+    }else{
+      // Un sol pare
+      const par=parents[0];
+      const ox=ncx(par),oy=nbot(par);
+      const midY=oy+(dy-oy)*0.5;
+      const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d',`M ${ox} ${oy} C ${ox} ${midY}, ${dx} ${midY}, ${dx} ${dy}`);
+      path.setAttribute('class','connector-line');
+      svg.appendChild(path);
+    }
+  });
 }
 
-function renderSidebar() {
-  const list = document.getElementById('person-list');
-  list.innerHTML = '';
-  const q = (document.getElementById('search-input').value||'').toLowerCase();
+function renderSidebar(){
+  const list=document.getElementById('person-list');
+  list.innerHTML='';
+  const q=(document.getElementById('search-input').value||'').toLowerCase();
   Object.values(people)
     .filter(p=>!q||(p.name+p.surname).toLowerCase().includes(q))
     .sort((a,b)=>(a.name+a.surname).localeCompare(b.name+b.surname))
     .forEach(p=>{
-      const item = document.createElement('div');
-      item.className = 'plist-item'+(p.id===selectedId?' active':'');
-      const ini = ((p.name||'')[0]||'').toUpperCase()+((p.surname||'')[0]||'').toUpperCase()||'?';
-      const bY = p.birth?p.birth.split('-')[0]:'';
-      const dY = p.death?p.death.split('-')[0]:'';
-      const dates = bY?(dY?`${bY}–${dY}`:`n. ${bY}`):'';
-      item.innerHTML = `
-        <div class="plist-avatar">${p.photo?`<img src="${p.photo}">`:ini}</div>
-        <div>
-          <div class="plist-name">${p.name||''} ${p.surname||''}</div>
-          ${dates?`<div class="plist-dates">${dates}</div>`:''}
-        </div>`;
-      item.onclick = ()=>selectPerson(p.id, true);
+      const item=document.createElement('div');
+      item.className='plist-item'+(p.id===selectedId?' active':'');
+      const ini=((p.name||'')[0]||'').toUpperCase()+((p.surname||'')[0]||'').toUpperCase()||'?';
+      const bY=p.birth?p.birth.split('-')[0]:'';
+      const dY=p.death?p.death.split('-')[0]:'';
+      const dates=bY?(dY?`${bY}–${dY}`:`n. ${bY}`):'';
+      item.innerHTML=`<div class="plist-avatar">${p.photo?`<img src="${p.photo}">`:ini}</div>
+        <div><div class="plist-name">${p.name||''} ${p.surname||''}</div>${dates?`<div class="plist-dates">${dates}</div>`:''}</div>`;
+      item.onclick=()=>selectPerson(p.id,true);
       list.appendChild(item);
     });
 }
 
-function updateStats() {
-  document.getElementById('stat-total').textContent = Object.keys(people).length;
-  let maxD = 0;
-  function depth(id,d){
-    maxD=Math.max(maxD,d);
-    relations.filter(r=>r.type==='parent-child'&&r.a===id).forEach(r=>depth(r.b,d+1));
+function updateStats(){
+  document.getElementById('stat-total').textContent=Object.keys(people).length;
+  let maxD=0;
+  function depth(id,d){ maxD=Math.max(maxD,d); relations.filter(r=>r.type==='parent-child'&&r.a===id).forEach(r=>depth(r.b,d+1)); }
+  Object.keys(people).filter(id=>!relations.some(r=>r.type==='parent-child'&&r.b===id)).forEach(id=>depth(id,1));
+  document.getElementById('stat-gen').textContent=Object.keys(people).length>0?(maxD||1):0;
+}
+
+// ── PERSON OPS ──
+function generateId(){ return 'p-'+Date.now()+'-'+Math.floor(Math.random()*10000); }
+function deletePerson(id){ dbDeletePerson(id); if(selectedId===id)selectedId=null; showToast('Persona eliminada'); }
+
+// ── PROFILE MODAL ──
+function openProfileModal(id){
+  profileId=id;
+  const p=people[id];
+  if(!p)return;
+  const ini=((p.name||'')[0]||'').toUpperCase()+((p.surname||'')[0]||'').toUpperCase()||'?';
+  document.getElementById('pm-photo').innerHTML=p.photo?`<img src="${p.photo}" style="width:100%;height:100%;object-fit:cover">`:ini;
+  document.getElementById('pm-name').textContent=(p.name||'')+(p.surname?' '+p.surname:'');
+  let ageStr='';
+  if(p.birth){
+    const bY=parseInt(p.birth.split('-')[0]);
+    ageStr=p.death?`${p.birth} – ${p.death} · ${parseInt(p.death.split('-')[0])-bY} anys`:`Nascut/da el ${bY} · ${new Date().getFullYear()-bY} anys`;
   }
-  Object.keys(people).filter(id=>!relations.some(r=>r.type==='parent-child'&&r.b===id))
-    .forEach(id=>depth(id,1));
-  document.getElementById('stat-gen').textContent = Object.keys(people).length>0?(maxD||1):0;
-}
-
-// ════════════════════════════════════════════
-// PERSON OPS
-// ════════════════════════════════════════════
-function generateId() {
-  return 'p-' + Date.now() + '-' + Math.floor(Math.random()*10000);
-}
-
-function deletePerson(id) {
-  dbDeletePerson(id);
-  if(selectedId===id) {selectedId=null;}
-  showToast('Persona eliminada');
-}
-
-// ════════════════════════════════════════════
-// PROFILE MODAL
-// ════════════════════════════════════════════
-function openProfileModal(id) {
-  profileId = id;
-  const p = people[id];
-  if (!p) return;
-  const ini = ((p.name||'')[0]||'').toUpperCase()+((p.surname||'')[0]||'').toUpperCase()||'?';
-  document.getElementById('pm-photo').innerHTML = p.photo
-    ? `<img src="${p.photo}" style="width:100%;height:100%;object-fit:cover">`
-    : ini;
-  document.getElementById('pm-name').textContent = (p.name||'')+(p.surname?' '+p.surname:'');
-  let ageStr = '';
-  if (p.birth) {
-    const bY = parseInt(p.birth.split('-')[0]);
-    if (p.death) {
-      const dY = parseInt(p.death.split('-')[0]);
-      ageStr = `${p.birth} – ${p.death} · ${dY-bY} anys`;
-    } else {
-      ageStr = `Nascut/da el ${bY} · ${new Date().getFullYear()-bY} anys`;
-    }
-  }
-  document.getElementById('pm-age').textContent = ageStr;
-  document.getElementById('pm-place').textContent = p.birthplace||'';
+  document.getElementById('pm-age').textContent=ageStr;
+  document.getElementById('pm-place').textContent=p.birthplace||'';
   document.getElementById('profile-modal').classList.add('open');
-  selectedId = id;
+  selectedId=id;
   renderSidebar();
   document.querySelectorAll('.person-node').forEach(n=>n.classList.toggle('selected',n.id==='node-'+id));
-  // If relation panel is open, sync it to this person
-  if (relPanelOpen) {
-    document.getElementById('rp-person').value = id;
-    renderRelPanel();
-  }
 }
-function closeProfileModal() {
-  document.getElementById('profile-modal').classList.remove('open');
-  profileId = null;
-}
-function editFromProfile() {
-  const id = profileId;
-  closeProfileModal();
-  if (id) startEdit(id);
-}
+function closeProfileModal(){ document.getElementById('profile-modal').classList.remove('open'); profileId=null; }
+function editFromProfile(){ const id=profileId; closeProfileModal(); if(id)startEdit(id); }
+function pmOpenRelations(){ const id=profileId; closeProfileModal(); openRelPanel(id); }
 
-// ════════════════════════════════════════════
-// SELECT / INFO
-// ════════════════════════════════════════════
-function selectPerson(id, scroll) {
-  selectedId = id;
-  const p = people[id];
-  if (!p) return;
-  renderNodes();
-  renderSidebar();
-  if (scroll) {
-    const wrap = document.getElementById('canvas-wrap');
-    const rect = wrap.getBoundingClientRect();
-    vx = rect.width/2 - (p.x+70)*vscale;
-    vy = rect.height/2 - (p.y+80)*vscale;
-    applyTransform();
+// ── SELECT ──
+function selectPerson(id,scroll){
+  selectedId=id; const p=people[id]; if(!p)return;
+  renderNodes(); renderSidebar();
+  if(scroll){
+    const rect=document.getElementById('canvas-wrap').getBoundingClientRect();
+    vx=rect.width/2-(p.x+70)*vscale; vy=rect.height/2-(p.y+80)*vscale; applyTransform();
   }
 }
 
-// ════════════════════════════════════════════
-// ADD / EDIT MODAL
-// ════════════════════════════════════════════
-function openAddModal() {
-  editingId = null; pendingPhoto = null;
-  document.getElementById('modal-title').textContent = 'Nova persona';
+// ── ADD/EDIT MODAL ──
+function openAddModal(){
+  editingId=null; pendingPhoto=null;
+  document.getElementById('modal-title').textContent='Nova persona';
   ['f-name','f-surname','f-birth','f-death','f-birthplace'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('f-gender').value='';
   resetPhotoPreview();
   document.getElementById('person-modal').classList.add('open');
   setTimeout(()=>document.getElementById('f-name').focus(),100);
 }
-
-function startEdit(id) {
-  editingId = id;
-  const p = people[id];
-  if (!p) return;
-  pendingPhoto = null;
-  document.getElementById('modal-title').textContent = 'Editar persona';
-  document.getElementById('f-name').value = p.name||'';
-  document.getElementById('f-surname').value = p.surname||'';
-  document.getElementById('f-birth').value = p.birth||'';
-  document.getElementById('f-death').value = p.death||'';
-  document.getElementById('f-gender').value = p.gender||'';
-  document.getElementById('f-birthplace').value = p.birthplace||'';
-  const inner = document.getElementById('photo-preview-inner');
-  inner.innerHTML = p.photo
-    ? `<img src="${p.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
-    : `<svg width="24" height="24" viewBox="0 0 16 16" fill="none" stroke="var(--text3)" stroke-width="1.5" style="margin-bottom:4px"><rect x="1" y="3" width="14" height="10" rx="2"/><circle cx="8" cy="8" r="2.5"/><path d="M5 3l1-2h4l1 2"/></svg><div class="photo-upload-text">Foto</div>`;
+function startEdit(id){
+  editingId=id; const p=people[id]; if(!p)return;
+  pendingPhoto=null;
+  document.getElementById('modal-title').textContent='Editar persona';
+  document.getElementById('f-name').value=p.name||'';
+  document.getElementById('f-surname').value=p.surname||'';
+  document.getElementById('f-birth').value=p.birth||'';
+  document.getElementById('f-death').value=p.death||'';
+  document.getElementById('f-gender').value=p.gender||'';
+  document.getElementById('f-birthplace').value=p.birthplace||'';
+  const inner=document.getElementById('photo-preview-inner');
+  inner.innerHTML=p.photo?`<img src="${p.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:`<svg width="24" height="24" viewBox="0 0 16 16" fill="none" stroke="var(--text3)" stroke-width="1.5" style="margin-bottom:4px"><rect x="1" y="3" width="14" height="10" rx="2"/><circle cx="8" cy="8" r="2.5"/><path d="M5 3l1-2h4l1 2"/></svg><div class="photo-upload-text">Foto</div>`;
   document.getElementById('person-modal').classList.add('open');
 }
-
-function closeModal() {
-  document.getElementById('person-modal').classList.remove('open');
-  editingId = null; pendingPhoto = null;
-}
-
-function savePerson() {
-  const name = document.getElementById('f-name').value.trim();
-  if (!name) { showToast('El nom és obligatori'); return; }
-
-  if (editingId) {
-    const p = people[editingId];
-    const updated = {
-      ...p,
-      name,
-      surname: document.getElementById('f-surname').value.trim(),
-      birth: document.getElementById('f-birth').value,
-      death: document.getElementById('f-death').value,
-      gender: document.getElementById('f-gender').value,
-      birthplace: document.getElementById('f-birthplace').value.trim(),
-    };
-    if (pendingPhoto) updated.photo = pendingPhoto;
-    dbSavePerson(updated);
-    showToast('Persona actualitzada');
-  } else {
-    const id = generateId();
-    const wrap = document.getElementById('canvas-wrap');
-    const rect = wrap.getBoundingClientRect();
-    const newP = {
-      id, name,
-      surname: document.getElementById('f-surname').value.trim(),
-      birth: document.getElementById('f-birth').value,
-      death: document.getElementById('f-death').value,
-      gender: document.getElementById('f-gender').value,
-      birthplace: document.getElementById('f-birthplace').value.trim(),
-      photo: pendingPhoto || null,
-      x: Math.round((rect.width/2 - vx)/vscale - 70),
-      y: Math.round((rect.height/2 - vy)/vscale - 80),
-    };
-    dbSavePerson(newP);
+function closeModal(){ document.getElementById('person-modal').classList.remove('open'); editingId=null; pendingPhoto=null; }
+function savePerson(){
+  const name=document.getElementById('f-name').value.trim();
+  if(!name){ showToast('El nom és obligatori'); return; }
+  if(editingId){
+    const p=people[editingId];
+    const u={...p,name,surname:document.getElementById('f-surname').value.trim(),birth:document.getElementById('f-birth').value,death:document.getElementById('f-death').value,gender:document.getElementById('f-gender').value,birthplace:document.getElementById('f-birthplace').value.trim()};
+    if(pendingPhoto)u.photo=pendingPhoto;
+    dbSavePerson(u); showToast('Persona actualitzada');
+  }else{
+    const id=generateId();
+    const rect=document.getElementById('canvas-wrap').getBoundingClientRect();
+    dbSavePerson({id,name,surname:document.getElementById('f-surname').value.trim(),birth:document.getElementById('f-birth').value,death:document.getElementById('f-death').value,gender:document.getElementById('f-gender').value,birthplace:document.getElementById('f-birthplace').value.trim(),photo:pendingPhoto||null,x:Math.round((rect.width/2-vx)/vscale-70),y:Math.round((rect.height/2-vy)/vscale-80)});
     showToast('Persona afegida');
   }
   closeModal();
 }
+function resetPhotoPreview(){ document.getElementById('photo-preview-inner').innerHTML=`<svg width="24" height="24" viewBox="0 0 16 16" fill="none" stroke="var(--text3)" stroke-width="1.5" style="margin-bottom:4px"><rect x="1" y="3" width="14" height="10" rx="2"/><circle cx="8" cy="8" r="2.5"/><path d="M5 3l1-2h4l1 2"/></svg><div class="photo-upload-text">Foto</div>`; }
 
-function resetPhotoPreview() {
-  document.getElementById('photo-preview-inner').innerHTML =
-    `<svg width="24" height="24" viewBox="0 0 16 16" fill="none" stroke="var(--text3)" stroke-width="1.5" style="margin-bottom:4px"><rect x="1" y="3" width="14" height="10" rx="2"/><circle cx="8" cy="8" r="2.5"/><path d="M5 3l1-2h4l1 2"/></svg><div class="photo-upload-text">Foto</div>`;
-}
-
-// ════════════════════════════════════════════
-// PHOTO
-// ════════════════════════════════════════════
-function handlePhotoUpload(e) {
-  const file = e.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    pendingPhoto = ev.target.result;
-    document.getElementById('photo-preview-inner').innerHTML =
-      `<img src="${pendingPhoto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
-  };
+// ── PHOTO ──
+function handlePhotoUpload(e){
+  const file=e.target.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{ pendingPhoto=ev.target.result; document.getElementById('photo-preview-inner').innerHTML=`<img src="${pendingPhoto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`; };
   reader.readAsDataURL(file);
 }
-
-function profilePhotoUpload() {
-  if (!profileId) return;
-  const input = document.createElement('input');
-  input.type = 'file'; input.accept = 'image/*';
-  input.onchange = e => {
-    const file = e.target.files[0]; if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const p = people[profileId];
-      if (!p) return;
-      const updated = {...p, photo: ev.target.result};
-      dbSavePerson(updated);
-      // Update profile modal photo immediately
-      document.getElementById('pm-photo').innerHTML =
-        `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover">`;
+function profilePhotoUpload(){
+  if(!profileId)return;
+  const input=document.createElement('input'); input.type='file'; input.accept='image/*';
+  input.onchange=e=>{
+    const file=e.target.files[0]; if(!file)return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      const p=people[profileId]; if(!p)return;
+      dbSavePerson({...p,photo:ev.target.result});
+      document.getElementById('pm-photo').innerHTML=`<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover">`;
       showToast('Foto actualitzada');
     };
     reader.readAsDataURL(file);
@@ -1035,454 +813,233 @@ function profilePhotoUpload() {
   input.click();
 }
 
-// ════════════════════════════════════════════
-// RELATION PANEL (person-centric)
-// ════════════════════════════════════════════
-let relPanelOpen = false;
-
-function openRelPanel(preselectId) {
-  relPanelOpen = true;
-  document.getElementById('rel-panel').style.transform = 'translateX(0)';
-  document.getElementById('rel-panel-overlay').style.display = 'block';
+// ── RELATION PANEL ──
+function openRelPanel(preselectId){
+  relPanelOpen=true;
+  document.getElementById('rel-panel').style.transform='translateX(0)';
+  document.getElementById('rel-panel-overlay').style.display='block';
   document.getElementById('btn-rel').classList.add('primary');
-
-  // Populate person selector
-  const sel = document.getElementById('rp-person');
-  const current = preselectId || sel.value || selectedId || Object.keys(people)[0] || '';
-  sel.innerHTML = Object.values(people)
-    .sort((a,b) => (a.name+a.surname).localeCompare(b.name+b.surname))
-    .map(p => `<option value="${p.id}"${p.id===current?' selected':''}>${p.name} ${p.surname||''}</option>`)
-    .join('');
-
+  const sel=document.getElementById('rp-person');
+  const current=preselectId||sel.value||selectedId||Object.keys(people)[0]||'';
+  sel.innerHTML=Object.values(people).sort((a,b)=>(a.name+a.surname).localeCompare(b.name+b.surname))
+    .map(p=>`<option value="${p.id}"${p.id===current?' selected':''}>${p.name} ${p.surname||''}</option>`).join('');
   renderRelPanel();
 }
-
-function closeRelPanel() {
-  relPanelOpen = false;
-  document.getElementById('rel-panel').style.transform = 'translateX(100%)';
-  document.getElementById('rel-panel-overlay').style.display = 'none';
+function closeRelPanel(){
+  if(pickMode)cancelPickMode();
+  relPanelOpen=false;
+  document.getElementById('rel-panel').style.transform='translateX(100%)';
+  document.getElementById('rel-panel-overlay').style.display='none';
   document.getElementById('btn-rel').classList.remove('primary');
 }
 
-function renderRelPanel() {
-  const personId = document.getElementById('rp-person').value;
-  const p = people[personId];
-  if (!p) return;
+function renderRelPanel(){
+  const personId=document.getElementById('rp-person').value;
+  const p=people[personId]; if(!p)return;
+  document.getElementById('rp-title').textContent=`${p.name} ${p.surname||''}`;
 
-  // Update "amb qui" selector (exclude self)
-  const otherSel = document.getElementById('rp-other');
-  otherSel.innerHTML = Object.values(people)
-    .filter(x => x.id !== personId)
-    .sort((a,b) => (a.name+a.surname).localeCompare(b.name+b.surname))
-    .map(x => `<option value="${x.id}">${x.name} ${x.surname||''}</option>`)
-    .join('');
+  const myRels=relations.filter(r=>r.a===personId||r.b===personId);
+  const couples=myRels.filter(r=>r.type==='couple');
+  const asParent=myRels.filter(r=>r.type==='parent-child'&&r.a===personId); // children
+  const asChild=myRels.filter(r=>r.type==='parent-child'&&r.b===personId);  // my parents
 
-  // Show/hide coParent row based on current type selection
-  rpTypeChanged();
+  const body=document.getElementById('rp-body');
+  body.innerHTML='';
 
-  // Build relations for this person
-  const myRels = relations.filter(r => r.a === personId || r.b === personId);
+  function pName(id){ const x=people[id]; return x?`${x.name}${x.surname?' '+x.surname:''}`:id; }
 
-  // Categorise
-  const couples   = myRels.filter(r => r.type === 'couple');
-  const parents   = myRels.filter(r => r.type === 'parent-child' && r.b === personId); // I am child
-  const children  = myRels.filter(r => r.type === 'parent-child' && r.a === personId); // I am parent
-
-  const body = document.getElementById('rp-body');
-  body.innerHTML = '';
-
-  function pName(id) {
-    const x = people[id];
-    return x ? `${x.name}${x.surname?' '+x.surname:''}` : '?';
+  function mkAvatar(id){
+    const x=people[id];
+    return x?.photo?`<img src="${x.photo}" style="width:100%;height:100%;object-fit:cover">`
+      :((x?.name||'')[0]||'?').toUpperCase();
   }
 
-  function relBlock(title, icon, items, emptyMsg) {
-    const section = document.createElement('div');
-    section.style.cssText = 'margin-bottom:18px';
-    section.innerHTML = `<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+  function mkRow(rel, otherId, onClickRow){
+    const row=document.createElement('div');
+    row.className='rp-row';
+    row.innerHTML=`
+      <div style="display:flex;align-items:center;gap:8px;min-width:0">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--accent);flex-shrink:0;overflow:hidden">${mkAvatar(otherId)}</div>
+        <span style="font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${pName(otherId)}</span>
+      </div>
+      <button class="rp-del" title="Eliminar">
+        <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
+      </button>`;
+    row.querySelector('.rp-del').addEventListener('click', async e=>{
+      e.stopPropagation();
+      if(!confirm(`Eliminar relació amb ${pName(otherId)}?`))return;
+      await dbDeleteRelation(rel.firestoreId);
+      renderRelPanel();
+    });
+    if(onClickRow) row.addEventListener('click', ()=>onClickRow(otherId));
+    return row;
+  }
+
+  function mkSection(title, icon, items, otherId_fn, addLabel, addRelType, addLabel2){
+    const sec=document.createElement('div');
+    sec.style.marginBottom='20px';
+    const hdr=document.createElement('div');
+    hdr.className='rp-section-header';
+    hdr.innerHTML=`<div class="rp-section-title">
       <span style="opacity:.5">${icon}</span>
       <span style="font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.05em">${title}</span>
     </div>`;
-
-    if (!items.length) {
-      const empty = document.createElement('div');
-      empty.style.cssText = 'font-size:12px;color:var(--text3);padding:6px 0 2px';
-      empty.textContent = emptyMsg;
-      section.appendChild(empty);
-    } else {
-      items.forEach(rel => {
-        const otherId = rel.a === personId ? rel.b : rel.a;
-        const row = document.createElement('div');
-        row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:9px;background:var(--surface2);margin-bottom:5px;cursor:pointer;transition:background .12s';
-        row.innerHTML = `
-          <div style="display:flex;align-items:center;gap:8px">
-            <div style="width:28px;height:28px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--accent);flex-shrink:0;overflow:hidden">
-              ${people[otherId]?.photo ? `<img src="${people[otherId].photo}" style="width:100%;height:100%;object-fit:cover">` : ((people[otherId]?.name||'')[0]||'?').toUpperCase()}
-            </div>
-            <span style="font-size:13px;font-weight:500;color:var(--text)">${pName(otherId)}</span>
-          </div>
-          <button data-fid="${rel.firestoreId}" style="width:22px;height:22px;border:none;background:transparent;cursor:pointer;color:var(--text3);display:flex;align-items:center;justify-content:center;border-radius:4px;padding:0;flex-shrink:0">
-            <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
-          </button>`;
-        row.addEventListener('mouseover', () => row.style.background = 'var(--border)');
-        row.addEventListener('mouseout', () => row.style.background = 'var(--surface2)');
-        row.querySelector('button').addEventListener('click', async e => {
-          e.stopPropagation();
-          if (!confirm(`Eliminar relació amb ${pName(otherId)}?`)) return;
-          await dbDeleteRelation(rel.firestoreId);
-          renderRelPanel();
-        });
-        row.addEventListener('click', () => {
-          // Jump to that person in the panel
-          document.getElementById('rp-person').value = otherId;
-          renderRelPanel();
-        });
-        section.appendChild(row);
+    const addBtn=document.createElement('button');
+    addBtn.className='rp-add-btn';
+    addBtn.innerHTML=`<svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/></svg> ${addLabel}`;
+    addBtn.addEventListener('click',()=>startPickMode(addRelType, addLabel2||addLabel));
+    hdr.appendChild(addBtn);
+    sec.appendChild(hdr);
+    if(!items.length){
+      const em=document.createElement('div'); em.className='rp-empty';
+      em.textContent='Sense registre'; sec.appendChild(em);
+    }else{
+      items.forEach(rel=>{
+        const otherId=otherId_fn(rel);
+        sec.appendChild(mkRow(rel,otherId,navId=>{
+          document.getElementById('rp-person').value=navId; renderRelPanel();
+        }));
       });
     }
-    body.appendChild(section);
+    return sec;
   }
 
-  const icoParet = `<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="4" r="2.5"/><path d="M4 14c0-3 8-3 8 0"/></svg>`;
-  const icoFill  = `<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="12" r="2.5"/><path d="M4 2c0 3 8 3 8 0"/></svg>`;
-  const icoAnell = `<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#c4933a" stroke-width="1.8"><circle cx="5" cy="8" r="3.5"/><circle cx="11" cy="8" r="3.5"/></svg>`;
+  const icoAnell=`<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#c4933a" stroke-width="1.8"><circle cx="5" cy="8" r="3.5"/><circle cx="11" cy="8" r="3.5"/></svg>`;
+  const icoPare=`<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="4" r="2.5"/><path d="M4 14c0-3 8-3 8 0"/></svg>`;
+  const icoFill=`<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="12" r="2.5"/><path d="M4 2c0 3 8 3 8 0"/></svg>`;
 
-  relBlock('Parella', icoAnell, couples, 'Sense parella registrada');
-  relBlock('Pares', icoParet, parents, 'Sense pares registrats');
-
-  // Children section — custom to show coParent
-  const childSection = document.createElement('div');
-  childSection.style.cssText = 'margin-bottom:18px';
-  childSection.innerHTML = `<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
-    <span style="opacity:.5">${icoFill}</span>
-    <span style="font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.05em">Fills/es</span>
-  </div>`;
-
-  if (!children.length) {
-    const empty = document.createElement('div');
-    empty.style.cssText = 'font-size:12px;color:var(--text3);padding:6px 0 2px';
-    empty.textContent = 'Sense fills/es registrats';
-    childSection.appendChild(empty);
-  } else {
-    children.forEach(rel => {
-      const childId = rel.b;
-      const coId = rel.coParent || null;
-      const coP = coId ? people[coId] : null;
-
-      const row = document.createElement('div');
-      row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:9px;background:var(--surface2);margin-bottom:5px;cursor:pointer;transition:background .12s';
-      row.innerHTML = `
-        <div style="display:flex;align-items:center;gap:8px;min-width:0">
-          <div style="width:28px;height:28px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--accent);flex-shrink:0;overflow:hidden">
-            ${people[childId]?.photo ? `<img src="${people[childId].photo}" style="width:100%;height:100%;object-fit:cover">` : ((people[childId]?.name||'')[0]||'?').toUpperCase()}
-          </div>
-          <div style="min-width:0">
-            <div style="font-size:13px;font-weight:500;color:var(--text)">${pName(childId)}</div>
-            ${coP ? `<div style="font-size:11px;color:var(--text3)">amb ${pName(coId)}</div>` : ''}
-          </div>
-        </div>
-        <button data-fid="${rel.firestoreId}" style="width:22px;height:22px;border:none;background:transparent;cursor:pointer;color:var(--text3);display:flex;align-items:center;justify-content:center;border-radius:4px;padding:0;flex-shrink:0">
-          <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>
-        </button>`;
-      row.addEventListener('mouseover', () => row.style.background = 'var(--border)');
-      row.addEventListener('mouseout', () => row.style.background = 'var(--surface2)');
-      row.querySelector('button').addEventListener('click', async e => {
-        e.stopPropagation();
-        if (!confirm(`Eliminar relació amb ${pName(childId)}?`)) return;
-        await dbDeleteRelation(rel.firestoreId);
-        renderRelPanel();
-      });
-      row.addEventListener('click', () => {
-        document.getElementById('rp-person').value = childId;
-        renderRelPanel();
-      });
-      childSection.appendChild(row);
-    });
-  }
-  body.appendChild(childSection);
+  body.appendChild(mkSection('Parella', icoAnell, couples, rel=>rel.a===personId?rel.b:rel.a, 'Afegir', 'couple', 'Clica la parella de '+p.name));
+  body.appendChild(mkSection('Pares', icoPare, asChild, rel=>rel.a, 'Afegir', 'parent-child-reverse', 'Clica un pare/mare de '+p.name));
+  body.appendChild(mkSection('Fills/es', icoFill, asParent, rel=>rel.b, 'Afegir', 'parent-child', 'Clica un fill/a de '+p.name));
 }
 
-function rpTypeChanged() {
-  const type = document.getElementById('rp-type').value;
-  const row = document.getElementById('rp-coparent-row');
-  row.style.display = (type === 'couple') ? 'none' : 'block';
-  // Repopulate coParent selector
-  rpRefreshCoparent();
-}
+// Override handlePickClick for 'parent-child-reverse' (I am the child, clicked person is parent)
+// ── CONTEXT MENU ──
+function openCtx(e,id){ ctxTarget=id; const m=document.getElementById('ctx-menu'); m.style.left=e.clientX+'px'; m.style.top=e.clientY+'px'; m.classList.add('open'); }
+function closeCtx(){ document.getElementById('ctx-menu').classList.remove('open'); ctxTarget=null; }
+function ctxEdit(){ if(ctxTarget)startEdit(ctxTarget); closeCtx(); }
+function ctxRelations(){ if(ctxTarget)openRelPanel(ctxTarget); closeCtx(); }
+function ctxPhoto(){ if(ctxTarget)openProfileModal(ctxTarget); closeCtx(); }
+function ctxDelete(){ if(ctxTarget&&confirm('Eliminar?'))deletePerson(ctxTarget); closeCtx(); }
+document.addEventListener('click',e=>{ if(!document.getElementById('ctx-menu').contains(e.target))closeCtx(); });
 
-function rpRefreshCoparent() {
-  const personId = document.getElementById('rp-person').value;
-  const otherId  = document.getElementById('rp-other').value;
-  const sel = document.getElementById('rp-coparent');
-  sel.innerHTML = '<option value="">Sense especificar</option>' +
-    Object.values(people)
-      .filter(x => x.id !== personId && x.id !== otherId)
-      .sort((a,b) => (a.name+a.surname).localeCompare(b.name+b.surname))
-      .map(x => `<option value="${x.id}">${x.name} ${x.surname||''}</option>`)
-      .join('');
-}
-
-function rpAddRelation() {
-  const personId   = document.getElementById('rp-person').value;
-  const otherId    = document.getElementById('rp-other').value;
-  const type       = document.getElementById('rp-type').value;
-  const coParentId = document.getElementById('rp-coparent').value || null;
-
-  if (!personId || !otherId || personId === otherId) { showToast('Selecciona dues persones diferents'); return; }
-
-  let a, b, relType;
-  if (type === 'couple') {
-    relType = 'couple'; a = personId; b = otherId;
-  } else if (type === 'parent-of') {
-    // personId is parent, otherId is child
-    relType = 'parent-child'; a = personId; b = otherId;
-  } else {
-    // child-of: personId is child, otherId is parent
-    relType = 'parent-child'; a = otherId; b = personId;
-  }
-
-  const dup = relations.find(r =>
-    r.type === relType && ((r.a === a && r.b === b) || (relType === 'couple' && r.a === b && r.b === a))
-  );
-  if (dup) { showToast('La relació ja existeix'); return; }
-
-  const relData = { type: relType, a, b, date: '' };
-  if (relType === 'parent-child' && coParentId) relData.coParent = coParentId;
-
-  dbSaveRelation(relData);
-  showToast('Relació afegida');
-}
-
-// Keep renderRelList for Firestore listener compatibility (called on snapshot)
-function renderRelList() {
-  if (relPanelOpen) renderRelPanel();
-}
-
-// ════════════════════════════════════════════
-// CONTEXT MENU
-// ════════════════════════════════════════════
-function openCtx(e,id) {
-  ctxTarget=id;
-  const m=document.getElementById('ctx-menu');
-  m.style.left=e.clientX+'px'; m.style.top=e.clientY+'px';
-  m.classList.add('open');
-}
-function closeCtx(){document.getElementById('ctx-menu').classList.remove('open');ctxTarget=null;}
-function ctxEdit(){if(ctxTarget)startEdit(ctxTarget);closeCtx();}
-function ctxAddRelation(){if(ctxTarget)openRelPanel(ctxTarget);closeCtx();}
-function ctxAddPhoto(){
-  if(ctxTarget) openProfileModal(ctxTarget);
-  closeCtx();
-}
-function ctxDelete(){if(ctxTarget&&confirm('Eliminar?'))deletePerson(ctxTarget);closeCtx();}
-document.addEventListener('click',e=>{if(!document.getElementById('ctx-menu').contains(e.target))closeCtx();});
-
-
-// ════════════════════════════════════════════
-// DRAG
-// ════════════════════════════════════════════
+// ── DRAG ──
 function startDrag(e,id){
-  if(e.button!==0)return;
-  e.stopPropagation();
-  dragging=id;
-  const p=people[id];
-  dragOffset={x:e.clientX/vscale-p.x, y:e.clientY/vscale-p.y};
+  if(e.button!==0)return; e.stopPropagation();
+  dragging=id; const p=people[id];
+  dragOffset={x:e.clientX/vscale-p.x,y:e.clientY/vscale-p.y};
   document.getElementById('node-'+id).classList.add('dragging');
-  document.addEventListener('mousemove',onDrag);
-  document.addEventListener('mouseup',endDrag);
+  document.addEventListener('mousemove',onDrag); document.addEventListener('mouseup',endDrag);
 }
 function onDrag(e){
-  if(!dragging)return;
-  const p=people[dragging];
-  p.x=Math.round(e.clientX/vscale-dragOffset.x);
-  p.y=Math.round(e.clientY/vscale-dragOffset.y);
+  if(!dragging)return; const p=people[dragging];
+  p.x=Math.round(e.clientX/vscale-dragOffset.x); p.y=Math.round(e.clientY/vscale-dragOffset.y);
   const node=document.getElementById('node-'+dragging);
-  if(node){node.style.left=p.x+'px';node.style.top=p.y+'px';}
+  if(node){ node.style.left=p.x+'px'; node.style.top=p.y+'px'; }
   renderConnectors();
 }
 function endDrag(){
   if(dragging){
-    // Save new position after a short debounce
-    const id=dragging;
-    const p=people[id];
-    clearTimeout(dragSaveTimer);
-    dragSaveTimer=setTimeout(()=>dbSavePerson(p), 600);
-    document.getElementById('node-'+id)?.classList.remove('dragging');
-    dragging=null;
+    const id=dragging,p=people[id];
+    clearTimeout(dragSaveTimer); dragSaveTimer=setTimeout(()=>dbSavePerson(p),600);
+    document.getElementById('node-'+id)?.classList.remove('dragging'); dragging=null;
   }
-  document.removeEventListener('mousemove',onDrag);
-  document.removeEventListener('mouseup',endDrag);
+  document.removeEventListener('mousemove',onDrag); document.removeEventListener('mouseup',endDrag);
 }
 
-// ════════════════════════════════════════════
-// PAN & ZOOM
-// ════════════════════════════════════════════
-function startPan(e){
-  if(dragging||e.button!==0)return;
-  panning=true;
-  panStart={x:e.clientX,y:e.clientY};
-  panOrigin={x:vx,y:vy};
-}
-function doPan(e){
-  if(!panning||dragging)return;
-  vx=panOrigin.x+(e.clientX-panStart.x);
-  vy=panOrigin.y+(e.clientY-panStart.y);
-  applyTransform();
-}
-function endPan(){panning=false;}
-
+// ── PAN & ZOOM ──
+function startPan(e){ if(dragging||pickMode||e.button!==0)return; panning=true; panStart={x:e.clientX,y:e.clientY}; panOrigin={x:vx,y:vy}; }
+function doPan(e){ if(!panning||dragging)return; vx=panOrigin.x+(e.clientX-panStart.x); vy=panOrigin.y+(e.clientY-panStart.y); applyTransform(); }
+function endPan(){ panning=false; }
 function handleWheel(e){
-  e.preventDefault();
-  const f=e.deltaY<0?1.1:0.9;
+  e.preventDefault(); const f=e.deltaY<0?1.1:0.9;
   const rect=document.getElementById('canvas-wrap').getBoundingClientRect();
-  const mx=e.clientX-rect.left, my=e.clientY-rect.top;
-  vx=mx-(mx-vx)*f; vy=my-(my-vy)*f;
-  vscale=Math.max(0.2,Math.min(2.5,vscale*f));
-  applyTransform();
+  const mx=e.clientX-rect.left,my=e.clientY-rect.top;
+  vx=mx-(mx-vx)*f; vy=my-(my-vy)*f; vscale=Math.max(0.2,Math.min(2.5,vscale*f)); applyTransform();
 }
-function zoomIn(){vscale=Math.min(2.5,vscale*1.15);applyTransform();}
-function zoomOut(){vscale=Math.max(0.2,vscale/1.15);applyTransform();}
-function resetZoom(){vscale=1;vx=160;vy=80;applyTransform();}
-
+function zoomIn(){ vscale=Math.min(2.5,vscale*1.15); applyTransform(); }
+function zoomOut(){ vscale=Math.max(0.2,vscale/1.15); applyTransform(); }
+function resetZoom(){ vscale=1; vx=160; vy=80; applyTransform(); }
 function applyTransform(){
-  const vp=document.getElementById('tree-viewport');
-  vp.style.transform=`translate(${vx}px,${vy}px) scale(${vscale})`;
+  document.getElementById('tree-viewport').style.transform=`translate(${vx}px,${vy}px) scale(${vscale})`;
   const svg=document.getElementById('tree-canvas');
   svg.style.transform=`translate(${vx}px,${vy}px) scale(${vscale})`;
   svg.style.transformOrigin='0 0';
   document.getElementById('zoom-label').textContent=Math.round(vscale*100)+'%';
 }
 
-// ════════════════════════════════════════════
-// SIDEBAR TOGGLE (con botón flotante)
-// ════════════════════════════════════════════
+// ── SIDEBAR ──
 function toggleSidebar(){
   sidebarOpen=!sidebarOpen;
   document.getElementById('sidebar').classList.toggle('collapsed',!sidebarOpen);
-  const btn=document.getElementById('panel-reopen-btn');
-  btn.classList.toggle('visible',!sidebarOpen);
+  document.getElementById('panel-reopen-btn').classList.toggle('visible',!sidebarOpen);
 }
 
-// ════════════════════════════════════════════
-// LAYOUT: DESA I CARREGA POSICIONS
-// ════════════════════════════════════════════
-async function saveLayoutAsDefault() {
+// ── LAYOUT ──
+async function saveLayoutAsDefault(){
   setSyncStatus('busy','Desant vista...');
-  try {
-    const positions = {};
-    Object.values(people).forEach(p => { positions[p.id] = { x: p.x||0, y: p.y||0 }; });
-    await db.collection('meta').doc('layout').set({ positions, savedAt: Date.now() });
-    setSyncStatus('ok','Vista desada');
-    showToast('Vista predeterminada desada');
-  } catch(e) {
-    setSyncStatus('err','Error en desar');
-    console.error(e);
-    showToast('Error en desar la vista');
-  }
+  try{
+    const pos={};
+    Object.values(people).forEach(p=>{ pos[p.id]={x:p.x||0,y:p.y||0}; });
+    await db.collection('meta').doc('layout').set({positions:pos,savedAt:Date.now()});
+    setSyncStatus('ok','Vista desada'); showToast('Vista predeterminada desada');
+  }catch(e){ setSyncStatus('err','Error'); showToast('Error en desar la vista'); }
 }
-
-async function loadSavedLayout() {
-  try {
-    const doc = await db.collection('meta').doc('layout').get();
-    if (!doc.exists) return false;
-    const { positions } = doc.data();
-    if (!positions) return false;
-    Object.keys(positions).forEach(id => {
-      if (people[id]) {
-        people[id].x = positions[id].x;
-        people[id].y = positions[id].y;
-      }
-    });
+async function loadSavedLayout(){
+  try{
+    const doc=await db.collection('meta').doc('layout').get();
+    if(!doc.exists)return false;
+    const{positions}=doc.data(); if(!positions)return false;
+    Object.keys(positions).forEach(id=>{ if(people[id]){people[id].x=positions[id].x;people[id].y=positions[id].y;} });
     return true;
-  } catch(e) {
-    console.error(e);
-    return false;
-  }
+  }catch(e){ return false; }
 }
-
-
 async function autoLayout(){
-  // Primer intenta carregar la vista desada
-  const hasSaved = await loadSavedLayout();
-  if (hasSaved) {
-    vx=40;vy=40;
-    renderAll();
-    showToast('Vista predeterminada carregada');
-    return;
-  }
-  // Si no n'hi ha, calcula l'ordre automàtic
+  const hasSaved=await loadSavedLayout();
+  if(hasSaved){ vx=40;vy=40;renderAll();showToast('Vista predeterminada carregada');return; }
   const NW=150,NH=195,HG=50,VG=80;
   const getChildren=id=>relations.filter(r=>r.type==='parent-child'&&r.a===id).map(r=>r.b);
-  const getPartner=id=>{const r=relations.find(r=>r.type==='couple'&&(r.a===id||r.b===id));return r?(r.a===id?r.b:r.a):null;};
+  const getPartner=id=>{ const r=relations.find(r=>r.type==='couple'&&(r.a===id||r.b===id)); return r?(r.a===id?r.b:r.a):null; };
   const roots=Object.keys(people).filter(id=>!relations.some(r=>r.type==='parent-child'&&r.b===id));
   let col=0; const visited=new Set();
   function place(id,gen){
     if(visited.has(id))return; visited.add(id);
     const partner=getPartner(id);
     people[id].x=col*(NW+HG); people[id].y=gen*(NH+VG);
-    if(partner&&!visited.has(partner)){col++;visited.add(partner);people[partner].x=col*(NW+HG);people[partner].y=gen*(NH+VG);}
+    if(partner&&!visited.has(partner)){ col++;visited.add(partner);people[partner].x=col*(NW+HG);people[partner].y=gen*(NH+VG); }
     const children=[...new Set([...getChildren(id),...(partner?getChildren(partner):[])])].filter(c=>!visited.has(c));
     if(children.length){children.forEach(cid=>{place(cid,gen+1);col++;});col--;}else{col++;}
   }
   roots.forEach(id=>place(id,0));
   Object.keys(people).filter(id=>!visited.has(id)).forEach(id=>{people[id].x=col*(NW+HG);people[id].y=0;col++;});
-
-  const batch = db.batch();
-  Object.values(people).forEach(p=>{
-    batch.update(db.collection('people').doc(p.id),{x:p.x,y:p.y});
-  });
-  batch.commit().catch(console.error);
-
-  vx=40;vy=40;
-  renderAll();
-  showToast('Arbre reorganitzat');
+  const b=db.batch();
+  Object.values(people).forEach(p=>b.update(db.collection('people').doc(p.id),{x:p.x,y:p.y}));
+  b.commit().catch(console.error);
+  vx=40;vy=40;renderAll();showToast('Arbre reorganitzat');
 }
 
-// ════════════════════════════════════════════
-// EXPORT
-// ════════════════════════════════════════════
+// ── EXPORT ──
 function exportData(){
-  const data={people:Object.values(people),relations};
-  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='arbol_genealogico.json';
-  a.click();
+  const blob=new Blob([JSON.stringify({people:Object.values(people),relations},null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='arbre.json'; a.click();
   showToast('Exportat com a JSON');
 }
 
-// ════════════════════════════════════════════
-// FILTER
-// ════════════════════════════════════════════
-function filterList(){renderSidebar();}
+// ── UTILS ──
+function filterList(){ renderSidebar(); }
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
 
-// ════════════════════════════════════════════
-// TOAST
-// ════════════════════════════════════════════
-function showToast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2500);
-}
-
-// ════════════════════════════════════════════
-// KEYBOARD
-// ════════════════════════════════════════════
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){closeModal();closeRelPanel();closeProfileModal();closeCtx();}
-  if((e.ctrlKey||e.metaKey)&&e.key==='n'){e.preventDefault();openAddModal();}
+  if(e.key==='Escape'){ if(pickMode){cancelPickMode();}else{closeModal();closeRelPanel();closeProfileModal();closeCtx();} }
+  if((e.ctrlKey||e.metaKey)&&e.key==='n'){ e.preventDefault(); openAddModal(); }
 });
-
 document.getElementById('canvas-wrap').addEventListener('click',e=>{
+  if(pickMode)return;
   if(e.target===document.getElementById('canvas-wrap')||e.target.classList.contains('canvas-grid')){
-    selectedId=null;
-    document.querySelectorAll('.person-node').forEach(n=>n.classList.remove('selected'));
+    selectedId=null; document.querySelectorAll('.person-node').forEach(n=>n.classList.remove('selected'));
   }
 });
 
-// ════════════════════════════════════════════
-// START
-// ════════════════════════════════════════════
 startListening();
 </script>
 </body>
