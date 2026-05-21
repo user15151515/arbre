@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arbre Genealògic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f7f4ee;--surface:#fff;--surface2:#f0ece3;
+  --border:#d9d2c4;--border2:#c4baa8;
+  --text:#1a1712;--text2:#6b6355;--text3:#9c9183;
+  --accent:#7c5c3e;--accent-light:#f0e8dc;
+  --gold:#c4933a;--danger:#8b3a3a;
+  --shadow:0 2px 12px rgba(60,40,20,.10);
+  --shadow-lg:0 6px 32px rgba(60,40,20,.16);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;user-select:none}
+
+/* TOP BAR */
+.topbar{height:56px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;z-index:100}
+.topbar-logo{font-family:'Playfair Display',serif;font-size:18px;color:var(--accent);margin-right:8px}
+.topbar-logo span{color:var(--gold);font-style:italic}
+.topbar-sep{width:1px;height:24px;background:var(--border)}
+.tb-btn{display:flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid var(--border);background:var(--surface);color:var(--text2);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;border-radius:7px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.tb-btn:hover{background:var(--surface2);border-color:var(--border2);color:var(--text)}
+.tb-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.tb-btn.primary:hover{background:#6a4d33}
+.tb-btn svg{width:15px;height:15px;flex-shrink:0}
+.tb-spacer{flex:1}
+.zoom-controls{display:flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:3px}
+.z-btn{width:28px;height:28px;border:none;background:transparent;cursor:pointer;border-radius:5px;font-size:16px;color:var(--text2);display:flex;align-items:center;justify-content:center;transition:all .1s}
+.z-btn:hover{background:var(--surface);color:var(--text)}
+.z-label{font-size:12px;color:var(--text3);min-width:38px;text-align:center}
+
+/* SYNC */
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#bbb;transition:background .4s;flex-shrink:0}
+.sync-dot.ok{background:#5a9a5a}
+.sync-dot.busy{background:var(--gold);animation:blink .7s infinite}
+.sync-dot.err{background:var(--danger)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.sync-lbl{font-size:11px;color:var(--text3)}
+
+/* LAYOUT */
+.main{display:flex;flex:1;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:260px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;z-index:10;transition:width .25s ease}
+.sidebar.collapsed{width:0}
+.sidebar-inner{width:260px;display:flex;flex-direction:column;height:100%;overflow:hidden}
+.sidebar-header{padding:14px 12px 10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.sidebar-title{font-family:'Playfair Display',serif;font-size:14px;color:var(--text2);letter-spacing:.03em;text-transform:uppercase}
+.hide-btn{width:26px;height:26px;border:1px solid var(--border);background:var(--surface2);border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text3);transition:all .12s}
+.hide-btn:hover{background:var(--border);color:var(--text2)}
+.search-wrap{padding:10px 12px;border-bottom:1px solid var(--border);position:relative;flex-shrink:0}
+.search-icon{position:absolute;left:20px;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none}
+.search-input{width:100%;padding:7px 10px 7px 30px;border:1px solid var(--border);background:var(--surface2);border-radius:7px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none}
+.search-input:focus{border-color:var(--accent)}
+.person-list{flex:1;overflow-y:auto;padding:8px}
+.person-list::-webkit-scrollbar{width:4px}
+.person-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+.plist-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background .12s;margin-bottom:2px}
+.plist-item:hover{background:var(--surface2)}
+.plist-item.active{background:var(--accent-light)}
+.plist-avatar{width:34px;height:34px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:var(--accent);flex-shrink:0;overflow:hidden}
+.plist-avatar img{width:100%;height:100%;object-fit:cover}
+.plist-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plist-dates{font-size:11px;color:var(--text3)}
+.sidebar-footer{padding:12px;border-top:1px solid var(--border);flex-shrink:0}
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat-box{background:var(--surface2);border-radius:8px;padding:8px 10px;text-align:center}
+.stat-num{font-size:18px;font-weight:500;color:var(--accent)}
+.stat-label{font-size:11px;color:var(--text3)}
+
+/* FLOATING REOPEN BUTTON */
+.panel-reopen-btn{
+  position:absolute;left:12px;top:12px;z-index:200;
+  width:36px;height:36px;border-radius:9px;
+  background:var(--surface);border:1px solid var(--border);
+  box-shadow:var(--shadow);cursor:pointer;
+  display:none;align-items:center;justify-content:center;
+  color:var(--text2);transition:all .15s;
+}
+.panel-reopen-btn:hover{background:var(--accent-light);border-color:var(--border2);color:var(--accent)}
+.panel-reopen-btn.visible{display:flex}
+
+/* CANVAS */
+.canvas-wrap{flex:1;position:relative;overflow:hidden;background:var(--bg)}
+.canvas-grid{position:absolute;inset:0;background-image:radial-gradient(circle,var(--border) 1px,transparent 1px);background-size:28px 28px;opacity:.5;pointer-events:none}
+#tree-canvas{position:absolute;top:0;left:0;pointer-events:none;overflow:visible}
+.tree-viewport{position:absolute;top:0;left:0;transform-origin:0 0}
+
+/* PERSON NODE */
+.person-node{position:absolute;width:140px;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:14px 12px 12px;cursor:grab;transition:box-shadow .18s,border-color .18s,transform .12s;box-shadow:var(--shadow);text-align:center}
+.person-node:hover{box-shadow:var(--shadow-lg);border-color:var(--border2)}
+.person-node.selected{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,92,62,.18),var(--shadow-lg)}
+.person-node.dragging{cursor:grabbing;z-index:999;box-shadow:var(--shadow-lg);transform:scale(1.03)}
+.node-avatar{width:52px;height:52px;border-radius:50%;margin:0 auto 8px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:500;color:var(--accent);overflow:hidden;border:2px solid var(--border);position:relative}
+.node-avatar img{width:100%;height:100%;object-fit:cover}
+.node-avatar .upload-hint{display:none}
+.deceased-avatar{filter:grayscale(45%);opacity:.88}
+.node-name{font-family:'Playfair Display',serif;font-size:13px;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:3px}
+.node-dates{font-size:10.5px;color:var(--text3);display:flex;align-items:center;justify-content:center;gap:3px}
+.deceased-cross{display:inline-flex;align-items:center;opacity:.65}
+.node-actions{display:flex;gap:4px;justify-content:center;margin-top:8px;opacity:0;transition:opacity .15s}
+.person-node:hover .node-actions{opacity:1}
+.node-action-btn{width:24px;height:24px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .1s;color:var(--text2)}
+.node-action-btn:hover{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+.node-action-btn.del:hover{background:#fde8e8;border-color:var(--danger);color:var(--danger)}
+
+/* CONNECTORS */
+.connector-line{fill:none;stroke:var(--border2);stroke-width:1.8}
+.connector-couple{fill:none;stroke:var(--gold);stroke-width:1.8;stroke-dasharray:5 3}
+
+/* GENDER DOT */
+.gender-tag{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:3px;flex-shrink:0}
+.gender-m{background:#5b7fad}
+.gender-f{background:#b56d8a}
+.gender-o{background:var(--border2)}
+
+/* LEGEND */
+.legend{position:absolute;bottom:16px;left:16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;z-index:50;font-size:11px;color:var(--text2)}
+.legend-row{display:flex;align-items:center;gap:7px;margin-bottom:4px}
+.legend-row:last-child{margin-bottom:0}
+.leg-line{width:24px;height:2px;background:var(--border2)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(30,25,18,.55);z-index:1000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border-radius:18px;width:480px;max-width:95vw;box-shadow:var(--shadow-lg);transform:translateY(12px);transition:transform .2s;max-height:90vh;overflow-y:auto}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-header{padding:22px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--text)}
+.modal-close{width:30px;height:30px;border:1px solid var(--border);background:var(--surface2);border-radius:7px;cursor:pointer;font-size:16px;color:var(--text2);display:flex;align-items:center;justify-content:center}
+.modal-close:hover{background:var(--border)}
+.modal-body{padding:20px 24px}
+.form-row{margin-bottom:16px}
+.form-row label{display:block;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:5px;letter-spacing:.04em;text-transform:uppercase}
+.form-row input,.form-row select{width:100%;padding:9px 12px;border:1px solid var(--border);background:var(--surface2);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border .15s}
+.form-row input:focus,.form-row select:focus{border-color:var(--accent)}
+.form-2col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.photo-upload-area{width:80px;height:80px;border-radius:50%;background:var(--accent-light);border:2px dashed var(--border2);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;margin:0 auto 16px;transition:border-color .15s}
+.photo-upload-area:hover{border-color:var(--accent)}
+.photo-upload-text{font-size:10px;color:var(--text3);text-align:center;margin-top:4px}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+.btn{padding:9px 20px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--text2);transition:all .15s}
+.btn:hover{background:var(--border);color:var(--text)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:#6a4d33}
+
+/* CONTEXT MENU */
+.ctx-menu{position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-lg);z-index:2000;min-width:180px;padding:6px;display:none}
+.ctx-menu.open{display:block}
+.ctx-item{padding:8px 12px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--text);display:flex;align-items:center;gap:8px;transition:background .1s}
+.ctx-item:hover{background:var(--surface2)}
+.ctx-item.danger{color:var(--danger)}
+.ctx-item.danger:hover{background:#fde8e8}
+.ctx-sep{height:1px;background:var(--border);margin:4px 0}
+
+/* RELATION BADGE */
+.relation-badge{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:3px 10px 3px 6px;font-size:12px;color:var(--text2);margin:3px}
+.relation-badge button{border:none;background:none;cursor:pointer;color:var(--text3);font-size:13px;line-height:1}
+.relation-badge button:hover{color:var(--danger)}
+#relation-list{min-height:32px;display:flex;flex-wrap:wrap;gap:4px}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:#fff;padding:10px 20px;border-radius:9px;font-size:13px;z-index:3000;transition:transform .3s;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* LOADING */
+.loading-overlay{position:fixed;inset:0;background:rgba(247,244,238,.92);z-index:5000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.loading-overlay.hidden{display:none}
+.loading-spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:13px;color:var(--text2)}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading">
+  <div class="loading-spinner"></div>
+  <div class="loading-text" id="loading-text">Connectant amb Firestore...</div>
+</div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo">Arbre</div>
+  <div class="topbar-sep"></div>
+  <button class="tb-btn primary" onclick="openAddModal()">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/></svg>
+    Nova persona
+  </button>
+  <button class="tb-btn" onclick="openRelModal()">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="4" cy="8" r="2.5"/><circle cx="12" cy="8" r="2.5"/><line x1="6.5" y1="8" x2="9.5" y2="8"/></svg>
+    Afegir relació
+  </button>
+  <div class="topbar-sep"></div>
+  <button class="tb-btn" onclick="autoLayout()">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>
+    Auto-ordenar
+  </button>
+  <button class="tb-btn" onclick="exportData()">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3v8m-3-3 3 3 3-3"/><path d="M3 12h10"/></svg>
+    Exportar
+  </button>
+  <div class="tb-spacer"></div>
+  <div style="display:flex;align-items:center;gap:6px">
+    <div class="sync-dot" id="sync-dot"></div>
+    <span class="sync-lbl" id="sync-lbl">–</span>
+  </div>
+  <div class="topbar-sep"></div>
+  <div class="zoom-controls">
+    <button class="z-btn" onclick="zoomOut()">−</button>
+    <span class="z-label" id="zoom-label">100%</span>
+    <button class="z-btn" onclick="zoomIn()">+</button>
+    <button class="z-btn" onclick="resetZoom()">⟳</button>
+  </div>
+</div>
+
+<div class="main">
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-header">
+        <div class="sidebar-title">Persones</div>
+        <button class="hide-btn" onclick="toggleSidebar()" title="Amaga el tauler">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="10,4 6,8 10,12"/></svg>
+        </button>
+      </div>
+      <div class="search-wrap">
+        <span class="search-icon"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6.5" cy="6.5" r="4.5"/><line x1="10.5" y1="10.5" x2="14" y2="14"/></svg></span>
+        <input class="search-input" type="text" placeholder="Cercar..." oninput="filterList(this.value)" id="search-input">
+      </div>
+      <div class="person-list" id="person-list"></div>
+      <div class="sidebar-footer">
+        <div class="stats-row">
+          <div class="stat-box"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Persones</div></div>
+          <div class="stat-box"><div class="stat-num" id="stat-gen">0</div><div class="stat-label">Generacions</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CANVAS -->
+  <div class="canvas-wrap" id="canvas-wrap"
+    onmousedown="startPan(event)"
+    onmousemove="doPan(event)"
+    onmouseup="endPan(event)"
+    onmouseleave="endPan(event)"
+    onwheel="handleWheel(event)"
+    oncontextmenu="return false">
+
+    <!-- Botón flotante para reabrir el panel cuando está oculto -->
+    <button class="panel-reopen-btn" id="panel-reopen-btn" onclick="toggleSidebar()" title="Mostra el tauler de persones">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,4 10,8 6,12"/></svg>
+    </button>
+
+    <div class="canvas-grid"></div>
+    <svg id="tree-canvas" width="100%" height="100%" style="overflow:visible;position:absolute;top:0;left:0;pointer-events:none;transform-origin:0 0">
+      <g id="svg-connectors"></g>
+    </svg>
+    <div class="tree-viewport" id="tree-viewport"></div>
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="legend-row"><div class="leg-line"></div> Pare / fill</div>
+      <div class="legend-row">
+        <svg width="24" height="10" viewBox="0 0 24 10"><line x1="0" y1="5" x2="24" y2="5" stroke="#c4933a" stroke-width="1.5" stroke-dasharray="4 2"/></svg>
+        <svg width="16" height="10" viewBox="0 0 16 10"><circle cx="5" cy="5" r="4" fill="none" stroke="#b8945a" stroke-width="1.5"/><circle cx="11" cy="5" r="4" fill="none" stroke="#c4933a" stroke-width="1.5"/></svg>
+        Parella
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal-overlay" id="person-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Nova persona</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="file" id="photo-file" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
+      <div class="photo-upload-area" onclick="document.getElementById('photo-file').click()">
+        <div id="photo-preview-inner">
+          <svg width="24" height="24" viewBox="0 0 16 16" fill="none" stroke="var(--text3)" stroke-width="1.5" style="margin-bottom:4px"><rect x="1" y="3" width="14" height="10" rx="2"/><circle cx="8" cy="8" r="2.5"/><path d="M5 3l1-2h4l1 2"/></svg>
+          <div class="photo-upload-text">Foto</div>
+        </div>
+      </div>
+      <div class="form-2col">
+        <div class="form-row"><label>Nom *</label><input type="text" id="f-name" placeholder="Nom"></div>
+        <div class="form-row"><label>Cognoms</label><input type="text" id="f-surname" placeholder="Cognoms"></div>
+      </div>
+      <div class="form-2col">
+        <div class="form-row"><label>Naixement</label><input type="date" id="f-birth"></div>
+        <div class="form-row"><label>Defunció</label><input type="date" id="f-death"></div>
+      </div>
+      <div class="form-2col">
+        <div class="form-row"><label>Lloc</label><input type="text" id="f-birthplace" placeholder="Ciutat, país"></div>
+        <div class="form-row"><label>Gènere</label>
+          <select id="f-gender">
+            <option value="">Sense especificar</option>
+            <option value="m">Masculí</option>
+            <option value="f">Femení</option>
+            <option value="o">Altre</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">Cancel·lar</button>
+      <button class="btn primary" onclick="savePerson()">Desar</button>
+    </div>
+  </div>
+</div>
+
+<!-- RELATION MODAL -->
+<div class="modal-overlay" id="rel-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Afegir relació</div>
+      <button class="modal-close" onclick="closeRelModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label>Tipus de relació</label>
+        <select id="rel-type">
+          <option value="parent-child">Pare/Mare → Fill/a</option>
+          <option value="couple">Parella / Matrimoni</option>
+          <option value="sibling">Germans/es</option>
+        </select>
+      </div>
+      <div class="form-2col">
+        <div class="form-row"><label>Persona A</label><select id="rel-a"></select></div>
+        <div class="form-row"><label>Persona B</label><select id="rel-b"></select></div>
+      </div>
+      <div class="form-row">
+        <label>Data (opcional)</label>
+        <input type="date" id="rel-date">
+      </div>
+      <div style="margin-top:14px">
+        <label style="font-size:12px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:8px">Relacions existents</label>
+        <div id="relation-list"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeRelModal()">Tancar</button>
+      <button class="btn primary" onclick="saveRelation()">Afegir</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONTEXT MENU -->
+<div class="ctx-menu" id="ctx-menu">
+  <div class="ctx-item" onclick="ctxEdit()">
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 2l3 3-8 8H3v-3L11 2z"/></svg>
+    Editar persona
+  </div>
+  <div class="ctx-item" onclick="ctxAddRelation()">
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="4" cy="8" r="2"/><circle cx="12" cy="8" r="2"/><line x1="6" y1="8" x2="10" y2="8"/></svg>
+    Afegir relació
+  </div>
+  <div class="ctx-item" onclick="ctxAddPhoto()">
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="3" width="14" height="10" rx="2"/><circle cx="8" cy="8" r="2.5"/><path d="M5 3l1-2h4l1 2"/></svg>
+    Canviar foto
+  </div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item danger" onclick="ctxDelete()">
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="2,4 14,4"/><path d="M5 4V2h6v2"/><rect x="3" y="4" width="10" height="10" rx="1"/></svg>
+    Eliminar
+  </div>
+</div>
+
+<!-- PROFILE MODAL -->
+<div class="modal-overlay" id="profile-modal" onclick="if(event.target===this)closeProfileModal()">
+  <div class="modal" style="width:340px;text-align:center">
+    <div class="modal-header" style="justify-content:flex-end;padding:14px 16px">
+      <button class="modal-close" onclick="closeProfileModal()">✕</button>
+    </div>
+    <div class="modal-body" style="padding:0 24px 24px">
+      <div id="pm-photo" onclick="profilePhotoUpload()" title="Canviar foto" style="width:110px;height:110px;border-radius:50%;margin:0 auto 16px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:500;color:var(--accent);overflow:hidden;border:3px solid var(--border);cursor:pointer;position:relative">
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:12px;margin-top:-10px">Prem la foto per canviar-la</div>
+      <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--text);margin-bottom:6px" id="pm-name"></div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:3px" id="pm-age"></div>
+      <div style="font-size:12px;color:var(--text3)" id="pm-place"></div>
+      <div style="display:flex;gap:8px;margin-top:18px;justify-content:center">
+        <button class="btn primary" onclick="editFromProfile()">Editar</button>
+        <button class="btn" onclick="closeProfileModal()">Tancar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase SDK (compat) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+// ════════════════════════════════════════════
+// FIREBASE INIT
+// ════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyB8YHkAH4wIOe7gBYmCwZ8gn95yNl6sGUM",
+  authDomain: "monica-bcd4f.firebaseapp.com",
+  projectId: "monica-bcd4f",
+  storageBucket: "monica-bcd4f.firebasestorage.app",
+  messagingSenderId: "310927692326",
+  appId: "1:310927692326:web:cdaa17f554e66645780ce7",
+  measurementId: "G-YDNDNM6BEE"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// ════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════
+let people = {};
+let relations = [];
+let selectedId = null;
+let editingId = null;
+let pendingPhoto = null;
+let profileId = null;
+let ctxTarget = null;
+
+// Pan/zoom
+let vx = 160, vy = 80, vscale = 1;
+let panning = false, panStart = {x:0,y:0}, panOrigin = {x:0,y:0};
+
+// Drag
+let dragging = null, dragOffset = {x:0,y:0};
+let dragSaveTimer = null;
+
+// Sidebar
+let sidebarOpen = true;
+
+// ════════════════════════════════════════════
+// SYNC STATUS HELPERS
+// ════════════════════════════════════════════
+function setSyncStatus(state, msg) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-lbl');
+  dot.className = 'sync-dot ' + state;
+  lbl.textContent = msg;
+}
+
+// ════════════════════════════════════════════
+// FIRESTORE LOAD + REALTIME LISTENER
+// ════════════════════════════════════════════
+function startListening() {
+  setSyncStatus('busy','Carregant...');
+
+  // Listen to people collection
+  db.collection('people').onSnapshot(snap => {
+    people = {};
+    snap.forEach(doc => {
+      people[doc.id] = { id: doc.id, ...doc.data() };
+    });
+
+    // If DB is empty, seed with initial data
+    if (snap.empty) {
+      seedInitialData();
+      return;
+    }
+
+    renderAll();
+    setSyncStatus('ok','Sincronitzat');
+    hideLoading();
+  }, err => {
+    setSyncStatus('err','Error de connexió');
+    console.error(err);
+    hideLoading();
+    showToast('Error en connectar amb Firestore');
+  });
+
+  // Listen to relations collection
+  db.collection('relations').onSnapshot(snap => {
+    relations = [];
+    snap.forEach(doc => {
+      relations.push({ firestoreId: doc.id, ...doc.data() });
+    });
+    renderConnectors();
+    renderRelList();
+  }, err => {
+    console.error('relations listener error:', err);
+  });
+}
+
+function hideLoading() {
+  document.getElementById('loading').classList.add('hidden');
+}
+
+// ════════════════════════════════════════════
+// SEED INITIAL DATA (Mónica, Xavier, Ares, Jana)
+// ════════════════════════════════════════════
+async function seedInitialData() {
+  document.getElementById('loading-text').textContent = 'Creant arbre inicial...';
+  setSyncStatus('busy','Desant...');
+  try {
+    const batch = db.batch();
+
+    const pMonicaRef = db.collection('people').doc('p-monica');
+    batch.set(pMonicaRef, {
+      name:'Mónica', surname:'Álvarez', birth:'', death:'', gender:'f',
+      birthplace:'', photo:null, x:80, y:80
+    });
+
+    const pXavierRef = db.collection('people').doc('p-xavier');
+    batch.set(pXavierRef, {
+      name:'Xavier', surname:'Pont', birth:'', death:'', gender:'m',
+      birthplace:'', photo:null, x:280, y:80
+    });
+
+    const pAresRef = db.collection('people').doc('p-ares');
+    batch.set(pAresRef, {
+      name:'Ares', surname:'Pont', birth:'', death:'', gender:'f',
+      birthplace:'', photo:null, x:80, y:300
+    });
+
+    const pJanaRef = db.collection('people').doc('p-jana');
+    batch.set(pJanaRef, {
+      name:'Jana', surname:'Pont', birth:'', death:'', gender:'f',
+      birthplace:'', photo:null, x:280, y:300
+    });
+
+    await batch.commit();
+
+    // Relations
+    await db.collection('relations').add({ type:'couple', a:'p-monica', b:'p-xavier', date:'' });
+    await db.collection('relations').add({ type:'parent-child', a:'p-monica', b:'p-ares', date:'' });
+    await db.collection('relations').add({ type:'parent-child', a:'p-monica', b:'p-jana', date:'' });
+    await db.collection('relations').add({ type:'sibling', a:'p-ares', b:'p-jana', date:'' });
+
+    showToast('Arbre inicial creat');
+  } catch(e) {
+    console.error(e);
+    setSyncStatus('err','Error en desar');
+    showToast('Error en crear les dades inicials');
+    hideLoading();
+  }
+}
+
+// ════════════════════════════════════════════
+// FIRESTORE WRITE HELPERS
+// ════════════════════════════════════════════
+async function dbSavePerson(person) {
+  setSyncStatus('busy','Desant...');
+  try {
+    const { id, ...data } = person;
+    await db.collection('people').doc(id).set(data);
+    setSyncStatus('ok','Desat');
+  } catch(e) {
+    setSyncStatus('err','Error en desar');
+    console.error(e);
+    showToast('Error en desar a Firestore');
+  }
+}
+
+async function dbDeletePerson(id) {
+  setSyncStatus('busy','Eliminant...');
+  try {
+    await db.collection('people').doc(id).delete();
+    // Delete associated relations
+    const snap = await db.collection('relations')
+      .where('a','==',id).get();
+    const snap2 = await db.collection('relations')
+      .where('b','==',id).get();
+    const delBatch = db.batch();
+    snap.docs.forEach(d => delBatch.delete(d.ref));
+    snap2.docs.forEach(d => delBatch.delete(d.ref));
+    await delBatch.commit();
+    setSyncStatus('ok','Eliminat');
+  } catch(e) {
+    setSyncStatus('err','Error');
+    console.error(e);
+  }
+}
+
+async function dbSaveRelation(rel) {
+  setSyncStatus('busy','Desant relació...');
+  try {
+    const { firestoreId, ...data } = rel;
+    if (firestoreId) {
+      await db.collection('relations').doc(firestoreId).set(data);
+    } else {
+      await db.collection('relations').add(data);
+    }
+    setSyncStatus('ok','Desat');
+  } catch(e) {
+    setSyncStatus('err','Error');
+    console.error(e);
+    showToast('Error en desar la relació');
+  }
+}
+
+async function dbDeleteRelation(firestoreId) {
+  setSyncStatus('busy','Eliminant...');
+  try {
+    await db.collection('relations').doc(firestoreId).delete();
+    setSyncStatus('ok','Eliminat');
+  } catch(e) {
+    setSyncStatus('err','Error');
+    console.error(e);
+  }
+}
+
+// ════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════
+function renderAll() {
+  renderNodes();
+  renderConnectors();
+  renderSidebar();
+  updateStats();
+}
+
+function renderNodes() {
+  const vp = document.getElementById('tree-viewport');
+  vp.innerHTML = '';
+  for (const id in people) {
+    const p = people[id];
+    const el = document.createElement('div');
+    el.className = 'person-node' + (id === selectedId ? ' selected' : '');
+    el.id = 'node-' + id;
+    el.style.left = (p.x || 0) + 'px';
+    el.style.top  = (p.y || 0) + 'px';
+
+    const initials = ((p.name||'')[0]||'').toUpperCase() + ((p.surname||'')[0]||'').toUpperCase() || '?';
+    const gDot = p.gender ? `<span class="gender-tag gender-${p.gender}"></span>` : '';
+    const bY = p.birth ? p.birth.split('-')[0] : '';
+    const dY = p.death ? p.death.split('-')[0] : '';
+    const dateStr = bY ? (dY ? `${bY} – ${dY}` : `n. ${bY}`) : '';
+    const dead = !!p.death;
+    const cross = dead ? `<span class="deceased-cross"><svg width="10" height="13" viewBox="0 0 10 13" fill="none"><line x1="5" y1="0" x2="5" y2="13" stroke="#9c9183" stroke-width="1.5"/><line x1="1" y1="3.5" x2="9" y2="3.5" stroke="#9c9183" stroke-width="1.5"/></svg></span>` : '';
+
+    el.innerHTML = `
+      <div class="node-avatar${dead?' deceased-avatar':''}">
+        ${p.photo ? `<img src="${p.photo}" alt="">` : initials}
+        <div class="upload-hint" data-id="${id}">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="1.8"><rect x="1" y="3" width="14" height="10" rx="2"/><circle cx="8" cy="8" r="2.5"/><path d="M5 3l1-2h4l1 2"/></svg>
+        </div>
+      </div>
+      <div class="node-name">${gDot}${p.name||''}${p.surname?`<br><span style="font-weight:400;font-size:11px;color:var(--text3)">${p.surname}</span>`:''}
+      </div>
+      ${dateStr||dead?`<div class="node-dates">${cross}${dateStr}</div>`:''}
+      <div class="node-actions">
+        <button class="node-action-btn" data-action="edit" data-id="${id}" title="Editar">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 2l3 3-8 8H3v-3L11 2z"/></svg>
+        </button>
+        <button class="node-action-btn del" data-action="del" data-id="${id}" title="Eliminar">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="2,4 14,4"/><path d="M5 4V2h6v2"/><rect x="3" y="4" width="10" height="10" rx="1"/></svg>
+        </button>
+      </div>`;
+
+    // (photo upload only via profile modal)
+    el.querySelectorAll('[data-action]').forEach(btn=>{
+      btn.addEventListener('mousedown', e=>e.stopPropagation());
+      btn.addEventListener('click', e=>{
+        e.stopPropagation();
+        if(btn.dataset.action==='edit') startEdit(id);
+        if(btn.dataset.action==='del' && confirm('¿Eliminar a '+p.name+'?')) deletePerson(id);
+      });
+    });
+
+    let mdPos = null;
+    el.addEventListener('mousedown', e=>{
+      if(e.button!==0) return;
+      mdPos = {x:e.clientX, y:e.clientY};
+      startDrag(e, id);
+    });
+    el.addEventListener('click', e=>{
+      e.stopPropagation();
+      if(!mdPos) return;
+      const dist = Math.hypot(e.clientX-mdPos.x, e.clientY-mdPos.y);
+      if(dist < 5) openProfileModal(id);
+      mdPos = null;
+    });
+    el.addEventListener('contextmenu', e=>{e.preventDefault();e.stopPropagation();openCtx(e,id);});
+    vp.appendChild(el);
+  }
+  applyTransform();
+}
+
+function renderConnectors() {
+  const svg = document.getElementById('svg-connectors');
+  svg.innerHTML = '';
+  const NW = 140, NH = 155;
+
+  relations.forEach(rel => {
+    const a = people[rel.a], b = people[rel.b];
+    if (!a || !b) return;
+    const ax = a.x+NW/2, ay = a.y+NH/2;
+    const bx = b.x+NW/2, by = b.y+NH/2;
+    const mx = (ax+bx)/2, my = (ay+by)/2;
+
+    if (rel.type === 'couple') {
+      const line = document.createElementNS('http://www.w3.org/2000/svg','path');
+      line.setAttribute('d',`M ${ax} ${ay} Q ${mx} ${my-20}, ${bx} ${by}`);
+      line.setAttribute('class','connector-couple');
+      svg.appendChild(line);
+
+      // Anillos entrelazados
+      const R=7, ov=4;
+      const angle = Math.atan2(by-ay, bx-ax);
+      const cmx = 0.25*ax+0.5*mx+0.25*bx;
+      const cmy = 0.25*ay+0.5*(my-20)+0.25*by;
+      const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+      const r1 = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      r1.setAttribute('cx', cmx-(ov/2)*Math.cos(angle));
+      r1.setAttribute('cy', cmy-(ov/2)*Math.sin(angle));
+      r1.setAttribute('r',R); r1.setAttribute('fill','var(--bg)');
+      r1.setAttribute('stroke','#b8945a'); r1.setAttribute('stroke-width','1.8');
+      const r2 = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      r2.setAttribute('cx', cmx+(ov/2)*Math.cos(angle));
+      r2.setAttribute('cy', cmy+(ov/2)*Math.sin(angle));
+      r2.setAttribute('r',R); r2.setAttribute('fill','var(--bg)');
+      r2.setAttribute('stroke','#c4933a'); r2.setAttribute('stroke-width','1.8');
+      g.appendChild(r1); g.appendChild(r2);
+      svg.appendChild(g);
+
+    } else if (rel.type === 'parent-child') {
+      const line = document.createElementNS('http://www.w3.org/2000/svg','path');
+      const sy = a.y+NH, ey = b.y;
+      const d = `M ${ax} ${sy} C ${ax} ${(sy+ey)/2}, ${bx} ${(sy+ey)/2}, ${bx} ${ey}`;
+      line.setAttribute('d',d);
+      line.setAttribute('class','connector-line');
+      svg.appendChild(line);
+    }
+    // sibling: no line drawn
+  });
+}
+
+function renderSidebar() {
+  const list = document.getElementById('person-list');
+  list.innerHTML = '';
+  const q = (document.getElementById('search-input').value||'').toLowerCase();
+  Object.values(people)
+    .filter(p=>!q||(p.name+p.surname).toLowerCase().includes(q))
+    .sort((a,b)=>(a.name+a.surname).localeCompare(b.name+b.surname))
+    .forEach(p=>{
+      const item = document.createElement('div');
+      item.className = 'plist-item'+(p.id===selectedId?' active':'');
+      const ini = ((p.name||'')[0]||'').toUpperCase()+((p.surname||'')[0]||'').toUpperCase()||'?';
+      const bY = p.birth?p.birth.split('-')[0]:'';
+      const dY = p.death?p.death.split('-')[0]:'';
+      const dates = bY?(dY?`${bY}–${dY}`:`n. ${bY}`):'';
+      item.innerHTML = `
+        <div class="plist-avatar">${p.photo?`<img src="${p.photo}">`:ini}</div>
+        <div>
+          <div class="plist-name">${p.name||''} ${p.surname||''}</div>
+          ${dates?`<div class="plist-dates">${dates}</div>`:''}
+        </div>`;
+      item.onclick = ()=>selectPerson(p.id, true);
+      list.appendChild(item);
+    });
+}
+
+function updateStats() {
+  document.getElementById('stat-total').textContent = Object.keys(people).length;
+  let maxD = 0;
+  function depth(id,d){
+    maxD=Math.max(maxD,d);
+    relations.filter(r=>r.type==='parent-child'&&r.a===id).forEach(r=>depth(r.b,d+1));
+  }
+  Object.keys(people).filter(id=>!relations.some(r=>r.type==='parent-child'&&r.b===id))
+    .forEach(id=>depth(id,1));
+  document.getElementById('stat-gen').textContent = Object.keys(people).length>0?(maxD||1):0;
+}
+
+// ════════════════════════════════════════════
+// PERSON OPS
+// ════════════════════════════════════════════
+function generateId() {
+  return 'p-' + Date.now() + '-' + Math.floor(Math.random()*10000);
+}
+
+function deletePerson(id) {
+  dbDeletePerson(id);
+  if(selectedId===id) {selectedId=null;}
+  showToast('Persona eliminada');
+}
+
+// ════════════════════════════════════════════
+// PROFILE MODAL
+// ════════════════════════════════════════════
+function openProfileModal(id) {
+  profileId = id;
+  const p = people[id];
+  if (!p) return;
+  const ini = ((p.name||'')[0]||'').toUpperCase()+((p.surname||'')[0]||'').toUpperCase()||'?';
+  document.getElementById('pm-photo').innerHTML = p.photo
+    ? `<img src="${p.photo}" style="width:100%;height:100%;object-fit:cover">`
+    : ini;
+  document.getElementById('pm-name').textContent = (p.name||'')+(p.surname?' '+p.surname:'');
+  let ageStr = '';
+  if (p.birth) {
+    const bY = parseInt(p.birth.split('-')[0]);
+    if (p.death) {
+      const dY = parseInt(p.death.split('-')[0]);
+      ageStr = `${p.birth} – ${p.death} · ${dY-bY} anys`;
+    } else {
+      ageStr = `Nascut/da el ${bY} · ${new Date().getFullYear()-bY} anys`;
+    }
+  }
+  document.getElementById('pm-age').textContent = ageStr;
+  document.getElementById('pm-place').textContent = p.birthplace||'';
+  document.getElementById('profile-modal').classList.add('open');
+  selectedId = id;
+  renderSidebar();
+  document.querySelectorAll('.person-node').forEach(n=>n.classList.toggle('selected',n.id==='node-'+id));
+}
+function closeProfileModal() {
+  document.getElementById('profile-modal').classList.remove('open');
+  profileId = null;
+}
+function editFromProfile() {
+  const id = profileId;
+  closeProfileModal();
+  if (id) startEdit(id);
+}
+
+// ════════════════════════════════════════════
+// SELECT / INFO
+// ════════════════════════════════════════════
+function selectPerson(id, scroll) {
+  selectedId = id;
+  const p = people[id];
+  if (!p) return;
+  renderNodes();
+  renderSidebar();
+  if (scroll) {
+    const wrap = document.getElementById('canvas-wrap');
+    const rect = wrap.getBoundingClientRect();
+    vx = rect.width/2 - (p.x+70)*vscale;
+    vy = rect.height/2 - (p.y+80)*vscale;
+    applyTransform();
+  }
+}
+
+// ════════════════════════════════════════════
+// ADD / EDIT MODAL
+// ════════════════════════════════════════════
+function openAddModal() {
+  editingId = null; pendingPhoto = null;
+  document.getElementById('modal-title').textContent = 'Nova persona';
+  ['f-name','f-surname','f-birth','f-death','f-birthplace'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-gender').value='';
+  resetPhotoPreview();
+  document.getElementById('person-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('f-name').focus(),100);
+}
+
+function startEdit(id) {
+  editingId = id;
+  const p = people[id];
+  if (!p) return;
+  pendingPhoto = null;
+  document.getElementById('modal-title').textContent = 'Editar persona';
+  document.getElementById('f-name').value = p.name||'';
+  document.getElementById('f-surname').value = p.surname||'';
+  document.getElementById('f-birth').value = p.birth||'';
+  document.getElementById('f-death').value = p.death||'';
+  document.getElementById('f-gender').value = p.gender||'';
+  document.getElementById('f-birthplace').value = p.birthplace||'';
+  const inner = document.getElementById('photo-preview-inner');
+  inner.innerHTML = p.photo
+    ? `<img src="${p.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
+    : `<svg width="24" height="24" viewBox="0 0 16 16" fill="none" stroke="var(--text3)" stroke-width="1.5" style="margin-bottom:4px"><rect x="1" y="3" width="14" height="10" rx="2"/><circle cx="8" cy="8" r="2.5"/><path d="M5 3l1-2h4l1 2"/></svg><div class="photo-upload-text">Foto</div>`;
+  document.getElementById('person-modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('person-modal').classList.remove('open');
+  editingId = null; pendingPhoto = null;
+}
+
+function savePerson() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { showToast('El nom és obligatori'); return; }
+
+  if (editingId) {
+    const p = people[editingId];
+    const updated = {
+      ...p,
+      name,
+      surname: document.getElementById('f-surname').value.trim(),
+      birth: document.getElementById('f-birth').value,
+      death: document.getElementById('f-death').value,
+      gender: document.getElementById('f-gender').value,
+      birthplace: document.getElementById('f-birthplace').value.trim(),
+    };
+    if (pendingPhoto) updated.photo = pendingPhoto;
+    dbSavePerson(updated);
+    showToast('Persona actualitzada');
+  } else {
+    const id = generateId();
+    const wrap = document.getElementById('canvas-wrap');
+    const rect = wrap.getBoundingClientRect();
+    const newP = {
+      id, name,
+      surname: document.getElementById('f-surname').value.trim(),
+      birth: document.getElementById('f-birth').value,
+      death: document.getElementById('f-death').value,
+      gender: document.getElementById('f-gender').value,
+      birthplace: document.getElementById('f-birthplace').value.trim(),
+      photo: pendingPhoto || null,
+      x: Math.round((rect.width/2 - vx)/vscale - 70),
+      y: Math.round((rect.height/2 - vy)/vscale - 80),
+    };
+    dbSavePerson(newP);
+    showToast('Persona afegida');
+  }
+  closeModal();
+}
+
+function resetPhotoPreview() {
+  document.getElementById('photo-preview-inner').innerHTML =
+    `<svg width="24" height="24" viewBox="0 0 16 16" fill="none" stroke="var(--text3)" stroke-width="1.5" style="margin-bottom:4px"><rect x="1" y="3" width="14" height="10" rx="2"/><circle cx="8" cy="8" r="2.5"/><path d="M5 3l1-2h4l1 2"/></svg><div class="photo-upload-text">Foto</div>`;
+}
+
+// ════════════════════════════════════════════
+// PHOTO
+// ════════════════════════════════════════════
+function handlePhotoUpload(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    pendingPhoto = ev.target.result;
+    document.getElementById('photo-preview-inner').innerHTML =
+      `<img src="${pendingPhoto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+function profilePhotoUpload() {
+  if (!profileId) return;
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = 'image/*';
+  input.onchange = e => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const p = people[profileId];
+      if (!p) return;
+      const updated = {...p, photo: ev.target.result};
+      dbSavePerson(updated);
+      // Update profile modal photo immediately
+      document.getElementById('pm-photo').innerHTML =
+        `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover">`;
+      showToast('Foto actualitzada');
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+// ════════════════════════════════════════════
+// RELATION MODAL
+// ════════════════════════════════════════════
+function openRelModal() {
+  fillRelSelects();
+  renderRelList();
+  document.getElementById('rel-modal').classList.add('open');
+}
+function closeRelModal() {
+  document.getElementById('rel-modal').classList.remove('open');
+}
+
+function fillRelSelects() {
+  ['rel-a','rel-b'].forEach(sid => {
+    document.getElementById(sid).innerHTML =
+      Object.values(people)
+        .sort((a,b)=>(a.name+a.surname).localeCompare(b.name+b.surname))
+        .map(p=>`<option value="${p.id}">${p.name} ${p.surname}</option>`)
+        .join('');
+  });
+}
+
+function saveRelation() {
+  const type = document.getElementById('rel-type').value;
+  const a = document.getElementById('rel-a').value;
+  const b = document.getElementById('rel-b').value;
+  const date = document.getElementById('rel-date').value;
+  if (a===b) { showToast('Selecciona dues persones diferents'); return; }
+  const dup = relations.find(r=>r.type===type&&((r.a===a&&r.b===b)||(r.a===b&&r.b===a)));
+  if (dup) { showToast('La relació ja existeix'); return; }
+  dbSaveRelation({type,a,b,date});
+  showToast('Relació afegida');
+}
+
+function renderRelList() {
+  const el = document.getElementById('relation-list');
+  el.innerHTML = '';
+  if (!relations.length) {
+    el.innerHTML = '<span style="font-size:12px;color:var(--text3)">Sense relacions encara</span>';
+    return;
+  }
+  const labels = {'parent-child':'→ fill/a','couple':'parella','sibling':'germà/na'};
+  relations.forEach(rel => {
+    const a=people[rel.a], b=people[rel.b];
+    if(!a||!b) return;
+    const badge = document.createElement('div');
+    badge.className='relation-badge';
+    badge.innerHTML=`${a.name} <span style="color:var(--text3)">${labels[rel.type]||rel.type}</span> ${b.name}
+      <button onclick="dbDeleteRelation('${rel.firestoreId}')" title="Eliminar">✕</button>`;
+    el.appendChild(badge);
+  });
+}
+
+// ════════════════════════════════════════════
+// CONTEXT MENU
+// ════════════════════════════════════════════
+function openCtx(e,id) {
+  ctxTarget=id;
+  const m=document.getElementById('ctx-menu');
+  m.style.left=e.clientX+'px'; m.style.top=e.clientY+'px';
+  m.classList.add('open');
+}
+function closeCtx(){document.getElementById('ctx-menu').classList.remove('open');ctxTarget=null;}
+function ctxEdit(){if(ctxTarget)startEdit(ctxTarget);closeCtx();}
+function ctxAddRelation(){openRelModal();closeCtx();}
+function ctxAddPhoto(){
+  // Open profile modal first, photo is changed from there
+  if(ctxTarget) openProfileModal(ctxTarget);
+  closeCtx();
+}
+function ctxDelete(){if(ctxTarget&&confirm('Eliminar?'))deletePerson(ctxTarget);closeCtx();}
+document.addEventListener('click',e=>{if(!document.getElementById('ctx-menu').contains(e.target))closeCtx();});
+
+// ════════════════════════════════════════════
+// DRAG
+// ════════════════════════════════════════════
+function startDrag(e,id){
+  if(e.button!==0)return;
+  e.stopPropagation();
+  dragging=id;
+  const p=people[id];
+  dragOffset={x:e.clientX/vscale-p.x, y:e.clientY/vscale-p.y};
+  document.getElementById('node-'+id).classList.add('dragging');
+  document.addEventListener('mousemove',onDrag);
+  document.addEventListener('mouseup',endDrag);
+}
+function onDrag(e){
+  if(!dragging)return;
+  const p=people[dragging];
+  p.x=Math.round(e.clientX/vscale-dragOffset.x);
+  p.y=Math.round(e.clientY/vscale-dragOffset.y);
+  const node=document.getElementById('node-'+dragging);
+  if(node){node.style.left=p.x+'px';node.style.top=p.y+'px';}
+  renderConnectors();
+}
+function endDrag(){
+  if(dragging){
+    // Save new position after a short debounce
+    const id=dragging;
+    const p=people[id];
+    clearTimeout(dragSaveTimer);
+    dragSaveTimer=setTimeout(()=>dbSavePerson(p), 600);
+    document.getElementById('node-'+id)?.classList.remove('dragging');
+    dragging=null;
+  }
+  document.removeEventListener('mousemove',onDrag);
+  document.removeEventListener('mouseup',endDrag);
+}
+
+// ════════════════════════════════════════════
+// PAN & ZOOM
+// ════════════════════════════════════════════
+function startPan(e){
+  if(dragging||e.button!==0)return;
+  panning=true;
+  panStart={x:e.clientX,y:e.clientY};
+  panOrigin={x:vx,y:vy};
+}
+function doPan(e){
+  if(!panning||dragging)return;
+  vx=panOrigin.x+(e.clientX-panStart.x);
+  vy=panOrigin.y+(e.clientY-panStart.y);
+  applyTransform();
+}
+function endPan(){panning=false;}
+
+function handleWheel(e){
+  e.preventDefault();
+  const f=e.deltaY<0?1.1:0.9;
+  const rect=document.getElementById('canvas-wrap').getBoundingClientRect();
+  const mx=e.clientX-rect.left, my=e.clientY-rect.top;
+  vx=mx-(mx-vx)*f; vy=my-(my-vy)*f;
+  vscale=Math.max(0.2,Math.min(2.5,vscale*f));
+  applyTransform();
+}
+function zoomIn(){vscale=Math.min(2.5,vscale*1.15);applyTransform();}
+function zoomOut(){vscale=Math.max(0.2,vscale/1.15);applyTransform();}
+function resetZoom(){vscale=1;vx=160;vy=80;applyTransform();}
+
+function applyTransform(){
+  const vp=document.getElementById('tree-viewport');
+  vp.style.transform=`translate(${vx}px,${vy}px) scale(${vscale})`;
+  const svg=document.getElementById('tree-canvas');
+  svg.style.transform=`translate(${vx}px,${vy}px) scale(${vscale})`;
+  svg.style.transformOrigin='0 0';
+  document.getElementById('zoom-label').textContent=Math.round(vscale*100)+'%';
+}
+
+// ════════════════════════════════════════════
+// SIDEBAR TOGGLE (con botón flotante)
+// ════════════════════════════════════════════
+function toggleSidebar(){
+  sidebarOpen=!sidebarOpen;
+  document.getElementById('sidebar').classList.toggle('collapsed',!sidebarOpen);
+  const btn=document.getElementById('panel-reopen-btn');
+  btn.classList.toggle('visible',!sidebarOpen);
+}
+
+// ════════════════════════════════════════════
+// AUTO LAYOUT
+// ════════════════════════════════════════════
+function autoLayout(){
+  const NW=150,NH=195,HG=50,VG=80;
+  const getChildren=id=>relations.filter(r=>r.type==='parent-child'&&r.a===id).map(r=>r.b);
+  const getPartner=id=>{const r=relations.find(r=>r.type==='couple'&&(r.a===id||r.b===id));return r?(r.a===id?r.b:r.a):null;};
+  const roots=Object.keys(people).filter(id=>!relations.some(r=>r.type==='parent-child'&&r.b===id));
+  let col=0; const visited=new Set();
+  function place(id,gen){
+    if(visited.has(id))return; visited.add(id);
+    const partner=getPartner(id);
+    people[id].x=col*(NW+HG); people[id].y=gen*(NH+VG);
+    if(partner&&!visited.has(partner)){col++;visited.add(partner);people[partner].x=col*(NW+HG);people[partner].y=gen*(NH+VG);}
+    const children=[...new Set([...getChildren(id),...(partner?getChildren(partner):[])])].filter(c=>!visited.has(c));
+    if(children.length){children.forEach(cid=>{place(cid,gen+1);col++;});col--;}else{col++;}
+  }
+  roots.forEach(id=>place(id,0));
+  Object.keys(people).filter(id=>!visited.has(id)).forEach(id=>{people[id].x=col*(NW+HG);people[id].y=0;col++;});
+
+  // Save all positions
+  const batch = db.batch();
+  Object.values(people).forEach(p=>{
+    batch.update(db.collection('people').doc(p.id),{x:p.x,y:p.y});
+  });
+  batch.commit().catch(console.error);
+
+  vx=40;vy=40;
+  renderAll();
+  showToast('Arbre reorganitzat');
+}
+
+// ════════════════════════════════════════════
+// EXPORT
+// ════════════════════════════════════════════
+function exportData(){
+  const data={people:Object.values(people),relations};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='arbol_genealogico.json';
+  a.click();
+  showToast('Exportat com a JSON');
+}
+
+// ════════════════════════════════════════════
+// FILTER
+// ════════════════════════════════════════════
+function filterList(){renderSidebar();}
+
+// ════════════════════════════════════════════
+// TOAST
+// ════════════════════════════════════════════
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ════════════════════════════════════════════
+// KEYBOARD
+// ════════════════════════════════════════════
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeModal();closeRelModal();closeProfileModal();closeCtx();}
+  if((e.ctrlKey||e.metaKey)&&e.key==='n'){e.preventDefault();openAddModal();}
+});
+
+document.getElementById('canvas-wrap').addEventListener('click',e=>{
+  if(e.target===document.getElementById('canvas-wrap')||e.target.classList.contains('canvas-grid')){
+    selectedId=null;
+    document.querySelectorAll('.person-node').forEach(n=>n.classList.remove('selected'));
+  }
+});
+
+// ════════════════════════════════════════════
+// START
+// ════════════════════════════════════════════
+startListening();
+</script>
+</body>
+</html>
