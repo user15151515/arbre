@@ -157,6 +157,29 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .rp-del{width:22px;height:22px;border:none;background:transparent;cursor:pointer;color:var(--text3);display:flex;align-items:center;justify-content:center;border-radius:4px;padding:0;flex-shrink:0;transition:color .1s}
 .rp-del:hover{color:var(--danger)}
 .rp-empty{font-size:12px;color:var(--text3);padding:4px 0 8px}
+/* RECT SELECT */
+#rect-sel{position:absolute;border:2px solid var(--accent);background:rgba(124,92,62,.08);pointer-events:none;display:none;z-index:800}
+.person-node.in-sel{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,92,62,.22)}
+/* FAMILY FOCUS */
+.person-node.ff-focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,92,62,.18),var(--shadow-lg)}
+.person-node.ff-ancestor{border-color:var(--gold);box-shadow:0 0 0 3px rgba(196,147,58,.2)}
+.ff-banner{position:fixed;top:56px;left:0;right:0;z-index:1400;background:var(--accent);color:#fff;display:none;align-items:center;justify-content:space-between;padding:9px 20px;font-size:13px;font-weight:500;box-shadow:0 2px 10px rgba(60,40,20,.18)}
+.ff-banner.active{display:flex}
+/* LINE MODE TOGGLE */
+.tb-seg{display:flex;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:7px;overflow:hidden}
+.tb-seg button{padding:5px 11px;border:none;background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--text2);transition:all .15s;white-space:nowrap}
+.tb-seg button.active{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(60,40,20,.10)}
+.tb-seg button:hover:not(.active){color:var(--text)}
+/* GENERATION SNAP LINES */
+.gen-line{position:absolute;left:0;right:0;pointer-events:none;border-top:1px dashed var(--border2);opacity:0;transition:opacity .15s;z-index:1}
+.gen-line.snap-active{border-top-color:var(--accent);opacity:1 !important}
+.gen-line-label{position:absolute;right:8px;top:-18px;font-size:10px;color:var(--text3);font-family:'DM Sans',sans-serif;background:var(--bg);padding:1px 5px;border-radius:4px;opacity:0;transition:opacity .15s}
+#snap-overlay{position:absolute;inset:0;pointer-events:none;z-index:2;overflow:hidden}
+/* snap ghost indicator */
+.snap-ghost{position:absolute;left:0;right:0;height:2px;background:var(--accent);opacity:0;pointer-events:none;z-index:900;transition:opacity .1s}
+.snap-ghost.show{opacity:.7}
+/* FAMILY FOCUS extra */
+.person-node.ff-child{border-color:#5b7fad;box-shadow:0 0 0 3px rgba(91,127,173,.2)}
 </style>
 </head>
 <body>
@@ -170,6 +193,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 <div class="pick-banner" id="pick-banner">
   <span id="pick-label">Clica una persona de l'arbre</span>
   <button onclick="cancelPickMode()" style="background:rgba(255,255,255,.25);border:none;border-radius:6px;padding:5px 14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer">Cancel·lar</button>
+</div>
+
+<!-- FAMILY FOCUS BANNER -->
+<div class="ff-banner" id="ff-banner">
+  <span id="ff-label">Vista familiar</span>
+  <button onclick="closeFamilyFocus()" style="background:rgba(255,255,255,.25);border:none;border-radius:6px;padding:5px 14px;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer">Tancar vista</button>
 </div>
 
 <div class="topbar">
@@ -195,6 +224,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
   <button class="tb-btn" onclick="exportData()">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3v8m-3-3 3 3 3-3"/><path d="M3 12h10"/></svg>
     Exportar
+  </button>
+  <div class="topbar-sep"></div>
+  <div class="tb-seg" title="Tipus de línies">
+    <button id="btn-curved" class="active" onclick="setLineMode('curved')">&#8767; Corbes</button>
+    <button id="btn-straight" onclick="setLineMode('straight')">&#x250C; Rectes</button>
+  </div>
+  <button class="tb-btn" id="btn-ff" onclick="openFamilyFocus()">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="5" r="2.5"/><path d="M3 14c0-4 10-4 10 0"/><path d="M1.5 7.5l2.5-3m8 0l2.5 3"/></svg>
+    Vista familiar
+  </button>
+  <button class="tb-btn" id="btn-snap" onclick="toggleSnap()" title="Ajust automàtic per generació">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="2" y1="4" x2="14" y2="4"/><line x1="2" y1="8" x2="14" y2="8"/><line x1="2" y1="12" x2="14" y2="12"/><circle cx="8" cy="8" r="2" fill="currentColor" stroke="none"/></svg>
+    Snap gen.
   </button>
   <div class="tb-spacer"></div>
   <div style="display:flex;align-items:center;gap:6px">
@@ -242,6 +284,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
       <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6,4 10,8 6,12"/></svg>
     </button>
     <div class="canvas-grid"></div>
+    <div id="rect-sel"></div>
+    <div id="snap-overlay"></div>
+    <div id="snap-ghost" class="snap-ghost"></div>
     <svg id="tree-canvas" width="100%" height="100%" style="overflow:visible;position:absolute;top:0;left:0;pointer-events:none;transform-origin:0 0">
       <g id="svg-connectors"></g>
     </svg>
@@ -379,6 +424,15 @@ let vx=160,vy=80,vscale=1;
 let panning=false,panStart={x:0,y:0},panOrigin={x:0,y:0};
 let dragging=null,dragOffset={x:0,y:0},dragSaveTimer=null;
 let sidebarOpen=true,relPanelOpen=false;
+// Line mode
+let lineMode='curved'; // 'curved' | 'straight'
+// Multi-select
+let selectedIds=new Set();
+let rectSelecting=false,rectStart={x:0,y:0},rectCur={x:0,y:0};
+let multiDragging=false,multiDragOffsets={},multiDragSaveTimer=null;
+// Family focus
+let familyFocusId=null;
+let familyFocusSet=null; // Set of ids visible in family focus mode
 
 // ── PICK MODE ──
 let pickMode = null;
@@ -405,6 +459,12 @@ function cancelPickMode() {
 function handlePickClick(clickedId) {
   console.log('[PICK] handlePickClick called, clickedId=', clickedId, 'pickMode=', pickMode);
   if (!pickMode) { console.warn('[PICK] pickMode is null, ignoring'); return; }
+  // Family focus intercept
+  if(pickMode.relType==='__ff__'){
+    cancelPickMode();
+    applyFamilyFocus(clickedId);
+    return;
+  }
   const personId = document.getElementById('rp-person').value;
   const { relType } = pickMode;
   console.log('[PICK] personId=', personId, 'relType=', relType);
@@ -506,7 +566,7 @@ async function dbDeleteRelation(fid){
 }
 
 // ── RENDER ──
-function renderAll(){ renderNodes(); renderConnectors(); renderSidebar(); updateStats(); }
+function renderAll(){ renderNodes(); renderConnectors(); renderSidebar(); updateStats(); renderSnapLines(); }
 
 function renderNodes(){
   const vp=document.getElementById('tree-viewport');
@@ -569,19 +629,46 @@ function renderNodes(){
     vp.appendChild(el);
   }
   applyTransform();
+  // Re-apply multi-select highlights
+  applySelectionClasses();
 }
 
 function renderConnectors(){
   const svg=document.getElementById('svg-connectors');
   svg.innerHTML='';
   const NW=140,NH=155,R=7;
-  const ncx=p=>(p.x||0)+NW/2, ncy=p=>(p.y||0)+NH/2;
-  const nbot=p=>(p.y||0)+NH, ntop=p=>(p.y||0);
+  // Use display positions: _ffx/_ffy during family focus, else real x/y
+  const px=p=>p._ffx!==undefined?p._ffx:(p.x||0);
+  const py=p=>p._ffy!==undefined?p._ffy:(p.y||0);
+  const ncx=p=>px(p)+NW/2, ncy=p=>py(p)+NH/2;
+  const nbot=p=>py(p)+NH, ntop=p=>py(p);
+
+  // Helper: path data depending on lineMode
+  function pathD(ox,oy,dx,dy){
+    if(lineMode==='curved'){
+      const midY=oy+(dy-oy)*0.5;
+      return `M ${ox} ${oy} C ${ox} ${midY}, ${dx} ${midY}, ${dx} ${dy}`;
+    }else{
+      // Orthogonal: down from origin, then horizontal, then down to dest
+      const midY=(oy+dy)/2;
+      return `M ${ox} ${oy} L ${ox} ${midY} L ${dx} ${midY} L ${dx} ${dy}`;
+    }
+  }
+  function couplePathD(ax,ay,bx,by){
+    if(lineMode==='curved'){
+      const mx=(ax+bx)/2,my=(ay+by)/2;
+      return `M ${ax} ${ay} Q ${mx} ${my-20}, ${bx} ${by}`;
+    }else{
+      const midX=(ax+bx)/2;
+      return `M ${ax} ${ay} L ${midX} ${ay} L ${midX} ${by} L ${bx} ${by}`;
+    }
+  }
 
   // Precompute couple rings midpoints
   const coupleRings={};
   relations.forEach(rel=>{
     if(rel.type!=='couple')return;
+    if(familyFocusSet&&(!familyFocusSet.has(rel.a)||!familyFocusSet.has(rel.b)))return;
     const a=people[rel.a],b=people[rel.b];
     if(!a||!b)return;
     const ax=ncx(a),ay=ncy(a),bx=ncx(b),by=ncy(b);
@@ -594,12 +681,12 @@ function renderConnectors(){
   // Draw couple lines + rings
   relations.forEach(rel=>{
     if(rel.type!=='couple')return;
+    if(familyFocusSet&&(!familyFocusSet.has(rel.a)||!familyFocusSet.has(rel.b)))return;
     const a=people[rel.a],b=people[rel.b];
     if(!a||!b)return;
     const ax=ncx(a),ay=ncy(a),bx=ncx(b),by=ncy(b);
-    const mx=(ax+bx)/2,my=(ay+by)/2;
     const line=document.createElementNS('http://www.w3.org/2000/svg','path');
-    line.setAttribute('d',`M ${ax} ${ay} Q ${mx} ${my-20}, ${bx} ${by}`);
+    line.setAttribute('d',couplePathD(ax,ay,bx,by));
     line.setAttribute('class','connector-couple');
     svg.appendChild(line);
     const ov=4,angle=Math.atan2(by-ay,bx-ax);
@@ -615,16 +702,11 @@ function renderConnectors(){
     svg.appendChild(g);
   });
 
-  // Draw parent-child lines
-  // New logic: for each child, find ALL their parents.
-  // If 2 parents exist and they have a couple relation → line from rings midpoint.
-  // If 2 parents but no couple → one line from each parent.
-  // If 1 parent → line from that parent's bottom.
-
-  // Build child→parents map
+  // Build child→parents map (filtered by focusSet if active)
   const childParents={};
   relations.forEach(rel=>{
     if(rel.type!=='parent-child')return;
+    if(familyFocusSet&&(!familyFocusSet.has(rel.a)||!familyFocusSet.has(rel.b)))return;
     if(!childParents[rel.b])childParents[rel.b]=[];
     childParents[rel.b].push(rel.a);
   });
@@ -632,51 +714,411 @@ function renderConnectors(){
   const drawnChildren=new Set();
   relations.forEach(rel=>{
     if(rel.type!=='parent-child')return;
+    if(familyFocusSet&&(!familyFocusSet.has(rel.a)||!familyFocusSet.has(rel.b)))return;
     const childId=rel.b;
     if(drawnChildren.has(childId))return;
     drawnChildren.add(childId);
-
     const child=people[childId];
     if(!child)return;
     const parents=(childParents[childId]||[]).map(id=>people[id]).filter(Boolean);
     const dx=ncx(child),dy=ntop(child);
-
     if(parents.length===0)return;
-
     if(parents.length>=2){
-      const p1=parents[0],p2=parents[1];
       const coupleKey=[childParents[childId][0],childParents[childId][1]].sort().join('|');
       if(coupleRings[coupleKey]){
-        // Surt dels anells
         const{rx,ry}=coupleRings[coupleKey];
         const ox=rx,oy=ry+R+2;
-        const midY=oy+(dy-oy)*0.5;
         const path=document.createElementNS('http://www.w3.org/2000/svg','path');
-        path.setAttribute('d',`M ${ox} ${oy} C ${ox} ${midY}, ${dx} ${midY}, ${dx} ${dy}`);
+        path.setAttribute('d',pathD(ox,oy,dx,dy));
         path.setAttribute('class','connector-line');
         svg.appendChild(path);
       }else{
-        // Un fil de cadascun
         parents.forEach(par=>{
           const ox=ncx(par),oy=nbot(par);
-          const midY=oy+(dy-oy)*0.5;
           const path=document.createElementNS('http://www.w3.org/2000/svg','path');
-          path.setAttribute('d',`M ${ox} ${oy} C ${ox} ${midY}, ${dx} ${midY}, ${dx} ${dy}`);
+          path.setAttribute('d',pathD(ox,oy,dx,dy));
           path.setAttribute('class','connector-line');
           svg.appendChild(path);
         });
       }
     }else{
-      // Un sol pare
       const par=parents[0];
       const ox=ncx(par),oy=nbot(par);
-      const midY=oy+(dy-oy)*0.5;
       const path=document.createElementNS('http://www.w3.org/2000/svg','path');
-      path.setAttribute('d',`M ${ox} ${oy} C ${ox} ${midY}, ${dx} ${midY}, ${dx} ${dy}`);
+      path.setAttribute('d',pathD(ox,oy,dx,dy));
       path.setAttribute('class','connector-line');
       svg.appendChild(path);
     }
   });
+}
+
+// ── LINE MODE ──
+function setLineMode(mode){
+  lineMode=mode;
+  document.getElementById('btn-curved').classList.toggle('active',mode==='curved');
+  document.getElementById('btn-straight').classList.toggle('active',mode==='straight');
+  renderConnectors();
+}
+
+// ── FAMILY FOCUS ──
+function openFamilyFocus(){
+  const ff=document.getElementById('btn-ff');
+  ff.classList.add('primary');
+  showToast('Clica una persona per veure la seva línia familiar');
+  familyPickPending=true;
+  document.querySelectorAll('.person-node').forEach(n=>n.classList.add('pick-mode'));
+  document.getElementById('pick-banner').classList.add('active');
+  document.getElementById('pick-label').textContent='Clica la persona per centrar la vista familiar';
+  pickMode={relType:'__ff__'};
+}
+
+let familyPickPending=false;
+let familyFocusSavedPositions={}; // id → {x,y} snapshot before focus layout
+
+function applyFamilyFocus(rootId){
+  familyFocusId=rootId;
+  const p=people[rootId]; if(!p)return;
+
+  function getParents(id){ return relations.filter(r=>r.type==='parent-child'&&r.b===id).map(r=>r.a); }
+  function getChildren(id){ return relations.filter(r=>r.type==='parent-child'&&r.a===id).map(r=>r.b); }
+  function getPartners(id){ return relations.filter(r=>r.type==='couple'&&(r.a===id||r.b===id)).map(r=>r.a===id?r.b:r.a); }
+
+  // BFS up — ancestors
+  const ancestors=new Set();
+  const ancestorGen={};
+  ancestorGen[rootId]=0;
+  const upQueue=[rootId];
+  while(upQueue.length){
+    const cur=upQueue.shift();
+    const curGen=ancestorGen[cur]||0;
+    getParents(cur).forEach(pid=>{
+      if(!ancestors.has(pid)){
+        ancestors.add(pid);
+        ancestorGen[pid]=curGen-1;
+        upQueue.push(pid);
+      }
+    });
+  }
+
+  // BFS down — descendants
+  const descendants=new Set();
+  const descGen={};
+  descGen[rootId]=0;
+  const downQueue=[rootId];
+  while(downQueue.length){
+    const cur=downQueue.shift();
+    const curGen=descGen[cur]||0;
+    getChildren(cur).forEach(cid=>{
+      if(!descendants.has(cid)){
+        descendants.add(cid);
+        descGen[cid]=curGen+1;
+        downQueue.push(cid);
+      }
+    });
+  }
+
+  // Build visible set: root + ancestors + descendants
+  // Partners: ONLY the person who is parent of someone already in focusSet via direct line.
+  // i.e. for each person P in focusSet, find X such that X is parent of some Q in focusSet,
+  // and X is NOT already in focusSet (they are not on the direct line themselves).
+  const focusSet=new Set([rootId,...ancestors,...descendants]);
+  const partnerOf=new Set();
+
+  // For each person in the direct line, find their OTHER parent (the one not in the line)
+  // A "line parent" of Q is someone in focusSet who has a parent-child relation to Q.
+  // The "missing parent" of Q is someone NOT in focusSet who also has parent-child to Q.
+  focusSet.forEach(childId=>{
+    const parentsOfChild=relations.filter(r=>r.type==='parent-child'&&r.b===childId).map(r=>r.a);
+    parentsOfChild.forEach(pid=>{
+      if(!focusSet.has(pid)&&people[pid]){
+        focusSet.add(pid);
+        partnerOf.add(pid);
+      }
+    });
+  });
+
+  const allGen={...ancestorGen,...descGen};
+  partnerOf.forEach(pid=>{
+    // Find a child of pid that is already in allGen → assign same generation as that child's other parent
+    const myChild=relations.find(r=>r.type==='parent-child'&&r.a===pid&&allGen[r.b]!==undefined);
+    if(myChild) allGen[pid]=allGen[myChild.b]-1;
+    else{
+      // fallback: same gen as whoever is already in focusSet and shares a child
+      const sibling=relations.find(r=>r.type==='parent-child'&&r.b===relations.find(r2=>r2.type==='parent-child'&&r2.a===pid)?.b&&allGen[r.a]!==undefined&&r.a!==pid);
+      if(sibling) allGen[pid]=allGen[sibling.a];
+    }
+  });
+
+  // ── Save original positions (snapshot) — do NOT touch people[id].x/y ──
+  familyFocusSavedPositions={};
+  Object.keys(people).forEach(id=>{
+    familyFocusSavedPositions[id]={x:people[id].x||0,y:people[id].y||0};
+  });
+
+  // ── Compute display-only layout ──
+  const NW=140,NH=155,HGAP=60,VGAP=80;
+  const byGen={};
+  focusSet.forEach(id=>{
+    const g=allGen[id]!==undefined?allGen[id]:0;
+    if(!byGen[g])byGen[g]=[];
+    byGen[g].push(id);
+  });
+  const gens=Object.keys(byGen).map(Number).sort((a,b)=>a-b);
+
+  const wrap=document.getElementById('canvas-wrap').getBoundingClientRect();
+  const cx=(wrap.width/2-vx)/vscale;
+
+  // Move only the DOM node (style.left/top) — never touch people[id].x/y
+  gens.forEach((g,i)=>{
+    const rowY=100+(i*(NH+VGAP));
+    const ids=byGen[g];
+    const rowW=ids.length*(NW+HGAP)-HGAP;
+    const startX=cx-rowW/2;
+    ids.forEach((id,j)=>{
+      const nx=Math.round(startX+j*(NW+HGAP));
+      const ny=Math.round(rowY);
+      const node=document.getElementById('node-'+id);
+      if(node){node.style.left=nx+'px';node.style.top=ny+'px';}
+      people[id]._ffx=nx; people[id]._ffy=ny;
+    });
+  });
+
+  // Apply classes — hide non-focus nodes entirely (no opacity, just hidden)
+  document.querySelectorAll('.person-node').forEach(n=>{
+    const id=n.id.replace('node-','');
+    n.classList.remove('ff-focus','ff-dim','ff-ancestor','ff-child');
+    if(!focusSet.has(id)){ n.style.display='none'; return; }
+    n.style.display='';
+    if(id===rootId) n.classList.add('ff-focus');
+    else if(ancestors.has(id)||partnerOf.has(id)) n.classList.add('ff-ancestor');
+    else if(descendants.has(id)) n.classList.add('ff-child');
+    else n.classList.add('ff-ancestor');
+  });
+
+  familyFocusSet=focusSet;
+  renderConnectors();
+
+  document.getElementById('ff-banner').classList.add('active');
+  document.getElementById('ff-label').textContent=`Vista de ${p.name} ${p.surname||''} — ${ancestors.size} avantpassats · ${descendants.size} descendents`;
+  document.getElementById('btn-ff').classList.add('primary');
+}
+
+function closeFamilyFocus(){
+  // Restore all original positions to DOM
+  Object.keys(familyFocusSavedPositions).forEach(id=>{
+    const saved=familyFocusSavedPositions[id];
+    const node=document.getElementById('node-'+id);
+    if(node){node.style.left=saved.x+'px';node.style.top=saved.y+'px';}
+    if(people[id]){
+      people[id].x=saved.x;
+      people[id].y=saved.y;
+      delete people[id]._ffx;
+      delete people[id]._ffy;
+    }
+  });
+  familyFocusSavedPositions={};
+  familyFocusId=null;
+  familyFocusSet=null;
+  document.querySelectorAll('.person-node').forEach(n=>{
+    n.style.display='';
+    n.classList.remove('ff-focus','ff-dim','ff-ancestor','ff-child');
+  });
+  renderConnectors();
+  document.getElementById('ff-banner').classList.remove('active');
+  document.getElementById('btn-ff').classList.remove('primary');
+}
+
+// ── GENERATION SNAP ──
+let snapEnabled=false;
+const SNAP_THRESH=28; // px in viewport coords — how close before snapping
+const GEN_STEP=235;   // default vertical distance between generation lines (px in viewport)
+const NODE_H=155;
+
+// Generation lines are "virtual" horizontal rails at y positions inferred from data
+// We compute them live from the actual Y positions of all nodes clustered into bands.
+// Extra: user can also snap to the nearest existing cluster.
+
+function toggleSnap(){
+  snapEnabled=!snapEnabled;
+  const btn=document.getElementById('btn-snap');
+  btn.classList.toggle('primary',snapEnabled);
+  renderSnapLines();
+  if(snapEnabled) showToast('Snap per generació activat — arrossega un node');
+  else{ clearSnapLines(); showToast('Snap desactivat'); }
+}
+
+// Compute generation Y bands from current node positions (simple 1D clustering)
+function computeGenBands(){
+  const ys=Object.values(people).map(p=>p.y||0).sort((a,b)=>a-b);
+  if(!ys.length)return[];
+  const bands=[];
+  let band=[ys[0]];
+  for(let i=1;i<ys.length;i++){
+    if(ys[i]-ys[i-1]<NODE_H*0.7) band.push(ys[i]);
+    else{ bands.push(band); band=[ys[i]]; }
+  }
+  bands.push(band);
+  return bands.map(b=>Math.round(b.reduce((s,v)=>s+v,0)/b.length));
+}
+
+function renderSnapLines(){
+  const overlay=document.getElementById('snap-overlay');
+  overlay.innerHTML='';
+  if(!snapEnabled)return;
+  const bands=computeGenBands();
+  bands.forEach((y,i)=>{
+    const line=document.createElement('div');
+    line.className='gen-line';
+    line.id='gen-line-'+i;
+    // Position in screen coords: translate from viewport
+    const screenY=y*vscale+vy;
+    line.style.top=screenY+'px';
+    line.style.opacity='0.45';
+    const lbl=document.createElement('div');
+    lbl.className='gen-line-label';
+    lbl.textContent='Gen '+(i+1);
+    lbl.style.opacity='0.6';
+    line.appendChild(lbl);
+    overlay.appendChild(line);
+  });
+}
+
+function updateSnapLinePositions(){
+  if(!snapEnabled)return;
+  const bands=computeGenBands();
+  bands.forEach((y,i)=>{
+    const line=document.getElementById('gen-line-'+i);
+    if(line) line.style.top=(y*vscale+vy)+'px';
+  });
+}
+
+function clearSnapLines(){
+  document.getElementById('snap-overlay').innerHTML='';
+  document.getElementById('snap-ghost').classList.remove('show');
+}
+
+// Snap a raw Y (viewport coords) to nearest generation band. Returns snapped Y or original.
+function snapYToGen(rawY){
+  if(!snapEnabled)return rawY;
+  const bands=computeGenBands();
+  // Also consider a new line above the topmost and below the bottommost (GEN_STEP spacing)
+  const extended=[...bands];
+  if(bands.length>0){
+    extended.unshift(bands[0]-GEN_STEP);
+    extended.push(bands[bands.length-1]+GEN_STEP);
+  }else{
+    extended.push(0,GEN_STEP,GEN_STEP*2);
+  }
+  let best=null,bestDist=Infinity;
+  extended.forEach(by=>{
+    const d=Math.abs(rawY-by);
+    if(d<bestDist){bestDist=d;best=by;}
+  });
+  if(bestDist<SNAP_THRESH){
+    showSnapGhost(best);
+    return best;
+  }
+  hideSnapGhost();
+  return rawY;
+}
+
+function showSnapGhost(yViewport){
+  const ghost=document.getElementById('snap-ghost');
+  ghost.style.top=(yViewport*vscale+vy)+'px';
+  ghost.classList.add('show');
+}
+function hideSnapGhost(){
+  document.getElementById('snap-ghost').classList.remove('show');
+}
+function canvasToViewport(cx,cy){
+  return{x:(cx-vx)/vscale,y:(cy-vy)/vscale};
+}
+function startRectSel(e){
+  const wrap=document.getElementById('canvas-wrap').getBoundingClientRect();
+  rectStart={x:e.clientX-wrap.left,y:e.clientY-wrap.top};
+  rectCur={...rectStart};
+  rectSelecting=true;
+  const rs=document.getElementById('rect-sel');
+  rs.style.display='block';
+  rs.style.left=rectStart.x+'px'; rs.style.top=rectStart.y+'px';
+  rs.style.width='0px'; rs.style.height='0px';
+  document.addEventListener('mousemove',doRectSel);
+  document.addEventListener('mouseup',endRectSel);
+}
+function doRectSel(e){
+  if(!rectSelecting)return;
+  const wrap=document.getElementById('canvas-wrap').getBoundingClientRect();
+  rectCur={x:e.clientX-wrap.left,y:e.clientY-wrap.top};
+  const x=Math.min(rectStart.x,rectCur.x),y=Math.min(rectStart.y,rectCur.y);
+  const w=Math.abs(rectCur.x-rectStart.x),h=Math.abs(rectCur.y-rectStart.y);
+  const rs=document.getElementById('rect-sel');
+  rs.style.left=x+'px'; rs.style.top=y+'px'; rs.style.width=w+'px'; rs.style.height=h+'px';
+}
+function endRectSel(e){
+  if(!rectSelecting)return;
+  rectSelecting=false;
+  document.getElementById('rect-sel').style.display='none';
+  document.removeEventListener('mousemove',doRectSel);
+  document.removeEventListener('mouseup',endRectSel);
+  const wrap=document.getElementById('canvas-wrap').getBoundingClientRect();
+  const x1=Math.min(rectStart.x,rectCur.x),y1=Math.min(rectStart.y,rectCur.y);
+  const x2=Math.max(rectStart.x,rectCur.x),y2=Math.max(rectStart.y,rectCur.y);
+  if(x2-x1<4&&y2-y1<4){ selectedIds.clear(); applySelectionClasses(); return; }
+  // Convert to viewport coords
+  const vp1=canvasToViewport(x1,y1),vp2=canvasToViewport(x2,y2);
+  selectedIds.clear();
+  const NW=140,NH=155;
+  Object.values(people).forEach(p=>{
+    const px=p.x||0,py=p.y||0;
+    if(px+NW>vp1.x&&px<vp2.x&&py+NH>vp1.y&&py<vp2.y) selectedIds.add(p.id);
+  });
+  applySelectionClasses();
+  if(selectedIds.size>0) showToast(`${selectedIds.size} persones seleccionades`);
+}
+function applySelectionClasses(){
+  document.querySelectorAll('.person-node').forEach(n=>{
+    const id=n.id.replace('node-','');
+    n.classList.toggle('in-sel',selectedIds.has(id));
+  });
+}
+
+// ── MULTI-DRAG ──
+function startMultiDrag(e,id){
+  // Called when mousedown on a node that's in selectedIds
+  multiDragging=true;
+  multiDragOffsets={};
+  selectedIds.forEach(sid=>{
+    const p=people[sid];
+    multiDragOffsets[sid]={ox:e.clientX/vscale-p.x,oy:e.clientY/vscale-p.y};
+  });
+  document.getElementById('node-'+id)?.classList.add('dragging');
+  document.addEventListener('mousemove',doMultiDrag);
+  document.addEventListener('mouseup',endMultiDrag);
+}
+function doMultiDrag(e){
+  if(!multiDragging)return;
+  selectedIds.forEach(sid=>{
+    const p=people[sid];
+    const off=multiDragOffsets[sid];
+    p.x=Math.round(e.clientX/vscale-off.ox);
+    p.y=Math.round(e.clientY/vscale-off.oy);
+    const node=document.getElementById('node-'+sid);
+    if(node){node.style.left=p.x+'px';node.style.top=p.y+'px';}
+  });
+  renderConnectors();
+}
+function endMultiDrag(){
+  if(!multiDragging)return;
+  multiDragging=false;
+  document.querySelectorAll('.person-node').forEach(n=>n.classList.remove('dragging'));
+  clearTimeout(multiDragSaveTimer);
+  multiDragSaveTimer=setTimeout(()=>{
+    const b=db.batch();
+    selectedIds.forEach(sid=>{ const{id,...d}=people[sid]; b.update(db.collection('people').doc(id),{x:d.x,y:d.y}); });
+    b.commit().catch(console.error);
+  },600);
+  document.removeEventListener('mousemove',doMultiDrag);
+  document.removeEventListener('mouseup',endMultiDrag);
 }
 
 function renderSidebar(){
@@ -926,6 +1368,11 @@ document.addEventListener('click',e=>{ if(!document.getElementById('ctx-menu').c
 // ── DRAG ──
 function startDrag(e,id){
   if(e.button!==0)return; e.stopPropagation();
+  // If this node is part of a multi-selection, do multi-drag
+  if(selectedIds.has(id)&&selectedIds.size>1){
+    startMultiDrag(e,id);
+    return;
+  }
   dragging=id; const p=people[id];
   dragOffset={x:e.clientX/vscale-p.x,y:e.clientY/vscale-p.y};
   document.getElementById('node-'+id).classList.add('dragging');
@@ -933,7 +1380,10 @@ function startDrag(e,id){
 }
 function onDrag(e){
   if(!dragging)return; const p=people[dragging];
-  p.x=Math.round(e.clientX/vscale-dragOffset.x); p.y=Math.round(e.clientY/vscale-dragOffset.y);
+  const rawX=Math.round(e.clientX/vscale-dragOffset.x);
+  const rawY=Math.round(e.clientY/vscale-dragOffset.y);
+  p.x=rawX;
+  p.y=snapYToGen(rawY);
   const node=document.getElementById('node-'+dragging);
   if(node){ node.style.left=p.x+'px'; node.style.top=p.y+'px'; }
   renderConnectors();
@@ -943,12 +1393,19 @@ function endDrag(){
     const id=dragging,p=people[id];
     clearTimeout(dragSaveTimer); dragSaveTimer=setTimeout(()=>dbSavePerson(p),600);
     document.getElementById('node-'+id)?.classList.remove('dragging'); dragging=null;
+    hideSnapGhost();
+    renderSnapLines(); // recompute bands after drop
   }
   document.removeEventListener('mousemove',onDrag); document.removeEventListener('mouseup',endDrag);
 }
 
 // ── PAN & ZOOM ──
-function startPan(e){ if(dragging||pickMode||e.button!==0)return; panning=true; panStart={x:e.clientX,y:e.clientY}; panOrigin={x:vx,y:vy}; }
+function startPan(e){ 
+  if(dragging||pickMode||e.button!==0)return; 
+  if(e.shiftKey){ startRectSel(e); return; }
+  selectedIds.clear(); applySelectionClasses();
+  panning=true; panStart={x:e.clientX,y:e.clientY}; panOrigin={x:vx,y:vy}; 
+}
 function doPan(e){ if(!panning||dragging)return; vx=panOrigin.x+(e.clientX-panStart.x); vy=panOrigin.y+(e.clientY-panStart.y); applyTransform(); }
 function endPan(){ panning=false; }
 function handleWheel(e){
@@ -966,6 +1423,7 @@ function applyTransform(){
   svg.style.transform=`translate(${vx}px,${vy}px) scale(${vscale})`;
   svg.style.transformOrigin='0 0';
   document.getElementById('zoom-label').textContent=Math.round(vscale*100)+'%';
+  updateSnapLinePositions();
 }
 
 // ── SIDEBAR ──
@@ -1036,7 +1494,8 @@ document.addEventListener('keydown',e=>{
 document.getElementById('canvas-wrap').addEventListener('click',e=>{
   if(pickMode)return;
   if(e.target===document.getElementById('canvas-wrap')||e.target.classList.contains('canvas-grid')){
-    selectedId=null; document.querySelectorAll('.person-node').forEach(n=>n.classList.remove('selected'));
+    selectedId=null; selectedIds.clear(); applySelectionClasses();
+    document.querySelectorAll('.person-node').forEach(n=>n.classList.remove('selected'));
   }
 });
 
